@@ -1,15 +1,21 @@
+<<<<<<< HEAD
 import Joi from 'joi';
+=======
+>>>>>>> 2258311 (first commit)
 import mysql from 'mysql2';
 import config from 'config';
 
 const MS = config.get('mysql');
 
+<<<<<<< HEAD
 const STATEMENT_SCHEMA = Joi.object({    
     query: Joi.string().required(),
     fields: Joi.array().items(Joi.string()).required()
 });
 
 // create mysql connection pool
+=======
+>>>>>>> 2258311 (first commit)
 const pool = mysql.createPool({
     host     : MS.host,
     user     : MS.user,
@@ -21,7 +27,11 @@ const pool = mysql.createPool({
 });
 
 async function query(statement, data, conn) {
+<<<<<<< HEAD
     const { query, fields } = await STATEMENT_SCHEMA.validateAsync(statement);
+=======
+    const { query, fields } = statement;
+>>>>>>> 2258311 (first commit)
     const input = Array.isArray(data)?data:fields.map(i=>data[i]);
 
     if (conn) {
@@ -54,6 +64,7 @@ async function queryTransaction(statements, dataArr) {
     });
 }
 
+<<<<<<< HEAD
 // async function getSQL(statement, data) {
 //     const { query, fields } = statement;
 //     const input = Array.isArray(data)?data:fields.map(i=>data[i]);
@@ -73,6 +84,8 @@ async function queryTransaction(statements, dataArr) {
 //         });
 //     });
 // }
+=======
+>>>>>>> 2258311 (first commit)
 
 // pool.on('acquire', function (connection) {
 //     console.log('Connection %d acquired', connection.threadId);
@@ -91,5 +104,9 @@ async function queryTransaction(statements, dataArr) {
 //     console.log("conection success");
 // });
 
+<<<<<<< HEAD
 const Pool = { pool, query, queryTransaction };
 export default Pool;
+=======
+module.exports = pool;
+>>>>>>> 2258311 (first commit)

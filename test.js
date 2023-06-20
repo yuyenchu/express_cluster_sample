@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // class obj {
 //     static n = 1;
 //     a () {
@@ -47,3 +48,37 @@ let statement={
 // if (error) throw error;
 // const value = MS_STATEMENT_SCHEMA.validateAsync(statement);
 await Joi.number().min(2).validateAsync(2);
+=======
+class obj {
+    static n = 1;
+    a () {
+  	    console.log('a')
+        console.log()
+    }
+  
+    b () {
+        this.a()
+        console.log('b')
+        obj.c()
+        console.log()
+    }
+
+    static c () {
+        console.log(obj.n)
+        console.log()
+        this.n++
+    }
+}
+
+let o = new obj()
+o.a()
+o.b()
+// o.c()
+let oo = new obj()
+// oo.c()
+
+
+// obj.c()
+// obj.c()
+console.log(obj.n)
+>>>>>>> 2258311 (first commit)

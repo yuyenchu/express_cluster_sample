@@ -1,6 +1,7 @@
 CREATE DATABASE userDB;
 USE userDB;
 CREATE TABLE users (
+<<<<<<< HEAD
     `username` varchar(80) NOT NULL,
     `password` varchar(41) NOT NULL,
     PRIMARY KEY (`username`)
@@ -15,4 +16,16 @@ CREATE TABLE memos (
     PRIMARY KEY (`id`),
     FOREIGN KEY (`member`) REFERENCES users(`username`)
 );
+=======
+    username varchar(80) PRIMARY KEY,
+    password varchar(41) NOT NULL
+);
+INSERT INTO users 
+    (username, password)
+VALUES 
+    ('root', 'root'),
+    ('user1', 'pass1'),
+    ('user2', 'pass2'),
+    ('user3', 'pass3');
+>>>>>>> 2258311 (first commit)
 

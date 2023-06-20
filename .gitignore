@@ -1,4 +1,5 @@
 # config files
+<<<<<<< HEAD
 config/*
 !config/default.json
 !config/README.md
@@ -11,6 +12,10 @@ cert/
 # db data
 mysql/data/
 redis/data/
+=======
+config/
+initialize.sql
+>>>>>>> 2258311 (first commit)
 
 # Logs
 logs

@@ -1,6 +1,9 @@
 **/node_modules/
 **/log/
+<<<<<<< HEAD
 **/logs/
+=======
+>>>>>>> 2258311 (first commit)
 mysql/
 redis/
 Dockerfile

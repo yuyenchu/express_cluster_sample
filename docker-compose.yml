@@ -1,15 +1,27 @@
+<<<<<<< HEAD
 version: '3.8'
 
 services:
   mysql:
     container_name: mysqldb
+=======
+version: '3.9'
+
+services:
+  mysql:
+>>>>>>> 2258311 (first commit)
     image: mysql:latest
     restart: always
     volumes:  
       - "${MYSQL_STORE}:/var/lib/mysql"
+<<<<<<< HEAD
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     # ports:
     #   - "3306:3306"
+=======
+      - "${MYSQL_INIT}:/docker-entrypoint-initdb.d"
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+>>>>>>> 2258311 (first commit)
     networks:
       - web_network
     environment:
@@ -18,15 +30,23 @@ services:
       # MYSQL_PASS: 'password'
 
   redis:
+<<<<<<< HEAD
     container_name: redisdb
     image: redis:alpine
     command: redis-server /etc/redis/redis.conf 
+=======
+    image: redis:alpine
+    command: redis-server /etc/redis/redis.conf --save 60 1 --loglevel warning
+>>>>>>> 2258311 (first commit)
     restart: always
     volumes:
       - "${REDIS_STORE}:/data"
       - ./redis/redis.conf:/etc/redis/redis.conf:ro
+<<<<<<< HEAD
     # ports:
     #   - "6379:6379"
+=======
+>>>>>>> 2258311 (first commit)
     networks:
       - web_network
 
@@ -35,17 +55,28 @@ services:
     restart: always
     networks:
       - web_network
+<<<<<<< HEAD
     depends_on:
       - mysql
       - redis
+=======
+>>>>>>> 2258311 (first commit)
     ports:
       - 8080:80
 
 networks:
   web_network:
     driver: bridge
+<<<<<<< HEAD
     # ipam:
     #   driver: default
     #   config:
     #     - subnet: 172.28.0.0/16
     #       gateway: 172.28.0.1
+=======
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
+>>>>>>> 2258311 (first commit)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import jwt from 'jsonwebtoken';
 import config from 'config';
 
@@ -23,10 +24,39 @@ function verifyToken(req, res, next) {
         req.username = decoded.user;
     } catch (err) {
         return res.status(401).send({ message: "Invalid Token" });
+=======
+const jwt = require("jsonwebtoken");
+const config = require('config');
+const SECRET = config.get('secret');
+const NON_SECURE_PATHS = config.get('nonSecurePaths');
+
+const verifyToken = (req, res, next) => {
+    // if (NON_SECURE_PATHS.includes(req.path)) {
+    //     return next();
+    // }
+
+    const token =
+        req.headers.authorization || 
+        req.headers["x-access-token"]||
+        req.query.token || 
+        req.body.token;
+    // console.log(token)
+    if (!token) {
+        return res.status(403).send({message:"A token is required for authentication"});
+    }
+    try {
+        const decoded = jwt.verify(token.replace('Bearer ',''), SECRET);
+        // console.log("decoded")
+        req.user = decoded;
+        req.username = decoded.user;
+    } catch (err) {
+        return res.status(401).send({message:"Invalid Token"});
+>>>>>>> 2258311 (first commit)
     }
     return next();
 };
 
+<<<<<<< HEAD
 function validateJWT(req, res, next) {
     const { accessToken, refreshToken } = req.cookies;
     if (!accessToken || !refreshToken) return res.status(403).end("JWT missing");
@@ -111,3 +141,6 @@ function renewAccessToken(req, res, next) {
 }
 
 export { validateJWT, renewAccessToken };
+=======
+module.exports = verifyToken;
+>>>>>>> 2258311 (first commit)
