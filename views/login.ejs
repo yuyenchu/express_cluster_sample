@@ -1,0 +1,31 @@
+<!-- views/login.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    </head>
+    <body style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="display:flex; flex-wrap: wrap;">
+            <div style="border: 1px solid #000; border-radius: 3px; margin:20px; padding: 10px;">
+                <h3>
+                    Login form
+                </h3>
+                <form action="/login" method="POST">
+                    <input type="text" name="username" placeholder="enter a username"/>
+                    <input type="text" name="password" placeholder="password is 123"/>
+                    <input type="submit" />
+                </form>
+            </div>
+            <div style="border: 1px solid #000; border-radius: 3px; margin:20px; padding: 10px;">
+                <h3>
+                    Signup form
+                </h3>
+                <form action="/signup" method="POST">
+                    <input type="text" name="username" placeholder="enter a username"/>
+                    <input type="text" name="password" placeholder="password is 123"/>
+                    <input type="submit" />
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

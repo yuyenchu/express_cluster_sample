@@ -1,0 +1,36 @@
+{
+  "name": "express_server",
+  "version": "1.0.0",
+  "description": "express server to serve and let users download web ui designs code",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "pm2 start ecosystem.config.cjs",
+    "dev": "docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c \"npm i pm2 -g && /bin/bash\"",
+    "build": "docker build . -t web_server:latest",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Yu",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "compression": "^1.7.4",
+    "config": "^3.3.6",
+    "connect-redis": "^7.1.0",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.6",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "express-session": "^1.17.1",
+    "helmet": "^4.6.0",
+    "lightship": "^9.0.2",
+    "moment": "^2.29.1",
+    "moment-duration-format": "^2.3.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.3.3",
+    "node-fetch": "^3.3.1",
+    "path": "^0.12.7",
+    "rate-limit-redis": "^3.0.2",
+    "redis": "^4.6.7",
+    "rotating-file-stream": "^3.1.0"
+  }
+}

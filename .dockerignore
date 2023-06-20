@@ -1,0 +1,7 @@
+**/node_modules/
+**/log/
+mysql/
+redis/
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml

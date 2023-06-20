@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    volumes:  
+      - "${MYSQL_STORE}:/var/lib/mysql"
+      - "${MYSQL_INIT}:/docker-entrypoint-initdb.d"
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - web_network
+    environment:
+      MYSQL_ROOT_PASSWORD: 'rootPassword12#$'
+      # MYSQL_USER: 'test'
+      # MYSQL_PASS: 'password'
+
+  redis:
+    image: redis:alpine
+    command: redis-server /etc/redis/redis.conf --save 60 1 --loglevel warning
+    restart: always
+    volumes:
+      - "${REDIS_STORE}:/data"
+      - ./redis/redis.conf:/etc/redis/redis.conf:ro
+    networks:
+      - web_network
+
+  web_server:
+    image: web_server:latest
+    restart: always
+    networks:
+      - web_network
+    ports:
+      - 8080:80
+
+networks:
+  web_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1

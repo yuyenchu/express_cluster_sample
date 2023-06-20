@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:latest
+    restart: "no"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/init-dev.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      MYSQL_ROOT_PASSWORD: 'rootPassword12#$'
+      # MYSQL_USER: 'test'
+      # MYSQL_PASS: 'password'
+
+  redis:
+    image: redis:alpine
+    command: redis-server /etc/redis/redis.conf
+    restart: "no"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis-dev.conf:/etc/redis/redis.conf:ro
