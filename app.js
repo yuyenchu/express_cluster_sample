@@ -1,5 +1,6 @@
 import express      from 'express';
 import rateLimit    from 'express-rate-limit';
+import slowDown     from 'express-slow-down';
 import session      from 'express-session';
 import chokidar     from 'chokidar';
 import compression  from 'compression';
@@ -9,14 +10,19 @@ import moment       from 'moment';
 import morgan       from 'morgan';
 import mysql        from 'mysql2';
 import fetch        from 'node-fetch';
+import fs           from 'fs';    
 import path         from 'path';
 import redis        from 'redis';
 import rfs          from 'rotating-file-stream';
-import momentDurationFormatSetup from "moment-duration-format";
+// plugin for moment, only need import
+import momentDurationFormatSetup from "moment-duration-format"; 
+import {unless} from 'express-unless';
 import { createLightship }  from 'lightship';  
 import { fileURLToPath }    from 'url';
 import { default as RedisStoreSession } from "connect-redis"
 import { default as RedisStoreRate }    from "rate-limit-redis";
+
+import apiRoutes from "./routers/api/apiRouter.js"  
 
 var app = express();
 
@@ -30,6 +36,7 @@ const MS        = config.get('mysql');
 const REDIS     = config.get('redis');
 const SESSION   = config.get('session');
 const RATE_LIMIT= config.get('rateLimit');
+const SLOW_DOWN = config.get('slowDown');
 const USE_SSL   = config.get('useSSL');
 const SSL_KEY   = config.get('sslKey');
 const SSL_CERT  = config.get('sslCert');
@@ -40,7 +47,7 @@ const RTFS_ROTATE = config.get('rtfsRotate');
 // https server
 var server = app;
 if (USE_SSL) {
-    const https = require('https');
+    const https = await import('https');
     function readCertsSync() {
         return {
             ...(fs.existsSync(SSL_KEY)   && {key:  fs.readFileSync(SSL_KEY, 'utf8')}),
@@ -127,31 +134,18 @@ const shouldCompress = (req, res) => {
     }
     return compression.filter(req, res);
 }
-
+console.log(RATE_LIMIT.window)
 // app middleware setup
 // using ejs views for dynamic pages
 app.set('views', path.join(__dirname, '/views'))
 app.set('view engine', 'ejs');
 // using HTTP request logger middleware
 app.use(morgan('short'));
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] \
+app.use(morgan(`${process.env.NODE_APP_INSTANCE}:remote-addr - :remote-user [:date[clf]] \
 ":method :url HTTP/:http-version" :status :res[content-length] \
-":referrer" ":user-agent" - :response-time ms',
+":referrer" ":user-agent" - :response-time ms`,
   {"stream": accessLogStream})
 );
-// using rate limit middleware
-app.use(rateLimit({
-    // config
-    windowMs: RATE_LIMIT.window,
-    max: RATE_LIMIT.maxReq, // Limit each IP requests per `window`
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    message: `You have exceeded the ${RATE_LIMIT.maxReq} requests in \
-${moment.duration(RATE_LIMIT.window, "seconds").format("h [hrs], m [min], ss [s]",{trim: "both mid"})} limit!`, 
-    store: new RedisStoreRate({
-        sendCommand: (...args) => redisClient.sendCommand(args),
-    }),
-}));
 // using secure HTTP headers middleware
 app.use(helmet());
 // using CORS middleware (allowing all CORS)
@@ -168,6 +162,37 @@ app.use(session({
         maxAge: SESSION.maxAge // session max age in miliseconds
     }
 }));
+// using rate limit middleware for api routes
+app.use('/api',rateLimit({
+    // rate limit config
+    windowMs: RATE_LIMIT.window, // window time in milliseconds
+    max: RATE_LIMIT.maxReq, // Limit each IP requests per `window`
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: `You have exceeded the ${RATE_LIMIT.maxReq} requests in \
+${moment.duration(RATE_LIMIT.window, "milliseconds").format("h [hrs], m [min], ss [s]",{trim: "both mid"})} limit!`, 
+    store: new RedisStoreRate({
+        prefix: 'rl:',
+        sendCommand: (...args) => redisClient.sendCommand(args),
+    }),
+}));
+// using slow down middleware except api routes
+const slowDownMiddleware = slowDown({
+    // slow down config
+    windowMs: SLOW_DOWN.window, // window time in milliseconds
+    delayAfter: SLOW_DOWN.delayAfter, // start delay after each IP requests per `window`
+    delayMs: SLOW_DOWN.delay, 
+    maxDelayMs: SLOW_DOWN.maxDelay,
+    skipFailedRequests: SLOW_DOWN.skipFail,
+    skipSuccessfulRequests: SLOW_DOWN.skipSuccess,
+    onLimitReached: (req, res, options) => {console.log('delay:',req.slowDown.delay)},
+    store: new RedisStoreRate({
+        prefix: 'sd:',
+        sendCommand: (...args) => redisClient.sendCommand(args),
+    }),
+});
+slowDownMiddleware.unless = unless;
+app.use(slowDownMiddleware.unless({path: ['/api']}));
 // setting static directory
 app.use(express.static(path.join(__dirname, 'public')));
 // setting cache control to do not allow any disk cache 
@@ -221,6 +246,11 @@ app.post('/logout', function(req, res) {
     }
     res.redirect('/user');
 }); 
+
+// api routes
+app.use('/api', apiRoutes);
+// auth routes
+// view routes
 
 // setup lightship for graceful shutdown and health check
 const lightship = await createLightship();

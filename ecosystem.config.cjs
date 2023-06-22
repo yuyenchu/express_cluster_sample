@@ -4,6 +4,7 @@ module.exports = {
         script: "app.js",
         wait_ready: true,
         kill_timeout : 3000,
+        instance_var: 'INSTANCE_ID',
         exec_mode: "cluster",
         env: {
             NODE_ENV: "development",
