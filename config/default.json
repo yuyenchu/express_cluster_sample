@@ -1,0 +1,50 @@
+{
+    "port": 3000,
+    "mysql": {
+        "host": "localhost",
+        "user": "root",
+        "password" : "rootPassword12#$",
+        "database" : "userDB",
+        "connLimit": 3,
+        "statements": {
+            "getCount": {
+                "query": "SELECT COUNT(*) AS count FROM users",
+                "fields" :[]
+            },
+            "addUser": {
+                "query": "INSERT INTO users (`username`, `password`) VALUES(?, ?);",
+                "fields": ["username", "password"]
+            }
+        }
+    },
+    "redis": {
+        "host": "localhost",
+        "port" : 6379,
+        "password" : ""
+    },
+    "session": {
+        "secret": "Secret123$%^",
+        "maxAge": 120000,
+        "resave": false,
+        "saveUninit": false
+    },
+    "utcOffset": 0,
+    "useSSL": true,
+    "sslKey": "cert/live/yhs473.tplinkdns.com/privkey.pem",
+    "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
+    "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
+    "rtfsRotate": "1d",
+    "useJWT": false,
+    "rateLimit": {
+        "window": 300000,
+        "maxReq": 10
+    },
+    "slowDown": {
+        "window": 300000,
+        "delayAfter": 10,
+        "delay": 500,
+        "maxDelay": 3000,
+        "skipFail": false,
+        "skipSuccess": false
+    }
+}
