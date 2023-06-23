@@ -5,17 +5,7 @@
         "user": "root",
         "password" : "rootPassword12#$",
         "database" : "userDB",
-        "connLimit": 3,
-        "statements": {
-            "getCount": {
-                "query": "SELECT COUNT(*) AS count FROM users",
-                "fields" :[]
-            },
-            "addUser": {
-                "query": "INSERT INTO users (`username`, `password`) VALUES(?, ?);",
-                "fields": ["username", "password"]
-            }
-        }
+        "connLimit": 3
     },
     "redis": {
         "host": "localhost",
@@ -24,7 +14,7 @@
     },
     "session": {
         "secret": "Secret123$%^",
-        "maxAge": 120000,
+        "maxAge": 300000,
         "resave": false,
         "saveUninit": false
     },

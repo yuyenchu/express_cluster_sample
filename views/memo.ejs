@@ -1,0 +1,85 @@
+<!-- views/user.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script defer src="/script/swup.min.js"></script>
+        <script defer src="/script/swup-preload.min.js"></script>
+        <script defer src="/script/script.js"></script>
+        <link href="/css/style.css" rel="stylesheet" type="text/css" >
+        <link href="/fontawesome/css/fontawesome.css" rel="stylesheet">
+        <link href="/fontawesome/css/brands.css" rel="stylesheet">
+        <link href="/fontawesome/css/solid.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <a href="#" class="logo">Logo</a>
+            <nav id="swup-nav">
+                <a href="/home" class="inactive">Home</a>
+                <a href="/memo" class="active">Memo</a>
+                <% if(login) { %>
+                    <a href="#" class="login" onclick="logout()">Logout</a>
+                <% } else{ %>
+                    <a href="/login" class="login">Login</a>
+                <% } %>
+            </nav>
+        </header>
+        <div class="spinner"></div>
+        <dialog>
+            <form id="addform" method="post" action="/api/addMemo">
+                <h3>Add a new Memo</h3>
+                <div>
+                    <label for="task">Task:</label>
+                    <input type="text" name="task"/>
+                    <label for="priority" style="margin-left: 5px;">Priority:</label>
+                    <select name="priority" form="addform">
+                        <option value="low">Low</option>
+                        <option value="middle">Middle</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit">Add</button>
+                    <button formmethod="dialog" type="submit">Cancel</button>
+                </div>
+            </form>
+        </dialog>
+        <main id="swup" class="transition-fade">
+            <div id="memoTitle">
+                <h2>
+                    <%= message %>
+                </h2>
+                <span data-open-modal style="display: <%= login?'block':'none' %>"><i class="fas fa-plus fa-lg"></i></span>
+            </div>
+            <div>
+                <table style="display: <%= login?'block':'none' %>">
+                    <thead>
+                      <tr>
+                        <th scope="col">Member</th>
+                        <th scope="col">Task</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i = 0; i < data.length; i++) { %>
+                            <tr>
+                                <th><span><%= data[i].member %></span></th>
+                                <td ><span style="text-decoration: <%= data[i].done?'line-through':'none' %>;"><%= data[i].task %></span></td>
+                                <td ><h6 class="priority"><span class="<%= data[i].priority %>"><%= data[i].priority %> priority</span></h6></td>
+                                <td >
+                                    <a href="#!" data-mdb-toggle="tooltip" title="Done" onclick="markMemo(<%= data[i].id %>)">
+                                        <i class="fas fa-check fa-lg"></i>
+                                    </a>
+                                    <a href="#!" data-mdb-toggle="tooltip" title="Remove" onclick="deleteMemo(<%= data[i].id %>)">
+                                        <i class="fas fa-trash-alt fa-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <% } %>                    
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </body>
+</html>

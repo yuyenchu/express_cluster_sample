@@ -8,7 +8,8 @@
     "start": "pm2 start ecosystem.config.cjs",
     "dev": "docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c \"npm i pm2 -g && /bin/bash\"",
     "build": "docker build . -t web_server:latest",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cert": "docker run --rm  -v $PWD/cert:/etc/letsencrypt  -p 80:80 -it certbot/certbot certonly --standalone --email YOUR_EMAIL@gmail.com --agree-tos --preferred-challenges http -d YOUR_DOMAIN.com"
   },
   "author": "Andrew Yu",
   "dependencies": {
@@ -24,6 +25,7 @@
     "express-slow-down": "^1.6.0",
     "express-unless": "^2.1.3",
     "helmet": "^4.6.0",
+    "ioredis": "^5.3.2",
     "lightship": "^9.0.2",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
@@ -32,7 +34,6 @@
     "node-fetch": "^3.3.1",
     "path": "^0.12.7",
     "rate-limit-redis": "^2.1.0",
-    "redis": "^4.6.7",
     "rotating-file-stream": "^3.1.0"
   }
 }

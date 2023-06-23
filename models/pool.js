@@ -3,6 +3,7 @@ import config from 'config';
 
 const MS = config.get('mysql');
 
+// create mysql connection pool
 const pool = mysql.createPool({
     host     : MS.host,
     user     : MS.user,
@@ -47,6 +48,25 @@ async function queryTransaction(statements, dataArr) {
     });
 }
 
+// async function getSQL(statement, data) {
+//     const { query, fields } = statement;
+//     const input = Array.isArray(data)?data:fields.map(i=>data[i]);
+
+//     return new Promise((resolve, reject)=>{ 
+//         pool.getConnection((err, connection) => {
+//             if (err) return reject(err);
+//             connection.query(query, input, function (error, results, fields) {
+//                 if (error)  return reject(error);
+//                 connection.commit(function(err) {
+//                     if (err) {
+//                         return reject(err);
+//                     }
+//                     return resolve(results);
+//                 });
+//             });
+//         });
+//     });
+// }
 
 // pool.on('acquire', function (connection) {
 //     console.log('Connection %d acquired', connection.threadId);
@@ -65,4 +85,5 @@ async function queryTransaction(statements, dataArr) {
 //     console.log("conection success");
 // });
 
-module.exports = pool;
+const Pool = { pool, query, queryTransaction };
+export default Pool;

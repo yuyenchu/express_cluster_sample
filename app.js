@@ -5,34 +5,39 @@ import session      from 'express-session';
 import chokidar     from 'chokidar';
 import compression  from 'compression';
 import cors         from 'cors';
+import fs           from 'fs';    
 import helmet       from 'helmet';
+import RedisClient  from "ioredis";
 import moment       from 'moment';
 import morgan       from 'morgan';
-import mysql        from 'mysql2';
 import fetch        from 'node-fetch';
-import fs           from 'fs';    
 import path         from 'path';
-import redis        from 'redis';
 import rfs          from 'rotating-file-stream';
 // plugin for moment, only need import
 import momentDurationFormatSetup from "moment-duration-format"; 
-import {unless} from 'express-unless';
+import { unless }           from 'express-unless';
 import { createLightship }  from 'lightship';  
 import { fileURLToPath }    from 'url';
-import { default as RedisStoreSession } from "connect-redis"
-import { default as RedisStoreRate }    from "rate-limit-redis";
+import { default as RedisStoreSession } from 'connect-redis';
+import { default as RedisStoreRate }    from 'rate-limit-redis';
 
-import apiRoutes from "./routers/api/apiRouter.js"  
+// set environment variable
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+process.env['NODE_CONFIG_DIR'] = path.join(__dirname, 'config');
+
+// import routes
+import apiRoutes    from './routers/api/apiRouter.js';
+import authRoutes   from './routers/auth/authRouter.js';
+
+// import model for general use
+import generalModel from './models/generalModel.js';
 
 var app = express();
 
 // reading configurations from config directory
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-process.env['NODE_CONFIG_DIR'] = path.join(__dirname, 'config');
 import config from 'config';
 
 const PORT      = config.get('port');
-const MS        = config.get('mysql');
 const REDIS     = config.get('redis');
 const SESSION   = config.get('session');
 const RATE_LIMIT= config.get('rateLimit');
@@ -76,42 +81,11 @@ if (USE_SSL) {
         });
 }
 
-// create mysql connection pool
-const pool = mysql.createPool({
-    host     : MS.host,
-    user     : MS.user,
-    password : MS.password,
-    database : MS.database,
-    multipleStatements: true,
-    waitForConnections : true,
-    connectionLimit : MS.connLimit
-});
-
-async function getSQL(statement, data) {
-    const { query, fields } = statement;
-    const input = Array.isArray(data)?data:fields.map(i=>data[i]);
-
-    return new Promise((resolve, reject)=>{ 
-        pool.getConnection((err, connection) => {
-            if (err) return reject(err);
-            connection.query(query, input, function (error, results, fields) {
-                if (error)  return reject(error);
-                connection.commit(function(err) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(results);
-                });
-            });
-        });
-    });
-}
-
 // create redis client connection
-const redisClient = redis.createClient({
+const redisClient = new RedisClient({
     host: REDIS.host,
     port: REDIS.port,
-    password: REDIS.password
+    ...(REDIS.password && {password: REDIS.password}),
 });
 redisClient.on('error', function (err) {
     console.log(`[ERROR] Could not establish a connection with redis: ${err}`);
@@ -119,12 +93,11 @@ redisClient.on('error', function (err) {
 redisClient.on('connect', function (err) {
     console.log('[INFO] Connected to redis successfully');
 });
-await redisClient.connect();
 
 // create a rotating write stream for logger
 let accessLogStream = rfs.createStream('access.log', {
     interval: RTFS_ROTATE,
-    path: path.join(__dirname, 'log')
+    path: path.join(__dirname, 'logs')
 })
 
 // compress middleware filter
@@ -134,20 +107,36 @@ const shouldCompress = (req, res) => {
     }
     return compression.filter(req, res);
 }
-console.log(RATE_LIMIT.window)
 // app middleware setup
 // using ejs views for dynamic pages
 app.set('views', path.join(__dirname, '/views'))
 app.set('view engine', 'ejs');
 // using HTTP request logger middleware
 app.use(morgan('short'));
-app.use(morgan(`${process.env.NODE_APP_INSTANCE}:remote-addr - :remote-user [:date[clf]] \
+app.use(morgan(`(${process.env.INSTANCE_ID??process.env.NODE_APP_INSTANCE}):remote-addr - :remote-user [:date[clf]] \
 ":method :url HTTP/:http-version" :status :res[content-length] \
 ":referrer" ":user-agent" - :response-time ms`,
   {"stream": accessLogStream})
 );
 // using secure HTTP headers middleware
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            "script-src": [
+                "'self'", 
+                "'unsafe-inline'", 
+                "unpkg.com", 
+                "yhs473.tplinkdns.com", 
+                "cdnjs.cloudflare.com"
+            ],
+            "script-src-attr": [
+                "'self'", 
+                "'unsafe-inline'"
+            ]
+        },
+    },
+}));
 // using CORS middleware (allowing all CORS)
 app.use(cors());
 // setting express session for user login/logout
@@ -172,11 +161,12 @@ app.use('/api',rateLimit({
     message: `You have exceeded the ${RATE_LIMIT.maxReq} requests in \
 ${moment.duration(RATE_LIMIT.window, "milliseconds").format("h [hrs], m [min], ss [s]",{trim: "both mid"})} limit!`, 
     store: new RedisStoreRate({
+        client: redisClient,
         prefix: 'rl:',
-        sendCommand: (...args) => redisClient.sendCommand(args),
+        sendCommand: async(...args) => redisClient.sendCommand(args),
     }),
 }));
-// using slow down middleware except api routes
+// using slow down middleware except api routes and static resources
 const slowDownMiddleware = slowDown({
     // slow down config
     windowMs: SLOW_DOWN.window, // window time in milliseconds
@@ -187,12 +177,16 @@ const slowDownMiddleware = slowDown({
     skipSuccessfulRequests: SLOW_DOWN.skipSuccess,
     onLimitReached: (req, res, options) => {console.log('delay:',req.slowDown.delay)},
     store: new RedisStoreRate({
+        client: redisClient,
         prefix: 'sd:',
-        sendCommand: (...args) => redisClient.sendCommand(args),
+        sendCommand: async(...args) => redisClient.sendCommand(args),
     }),
 });
 slowDownMiddleware.unless = unless;
-app.use(slowDownMiddleware.unless({path: ['/api']}));
+app.use(slowDownMiddleware.unless({
+    path: ['/api'],
+    ext: [".png", ".jpg", ".css", ".js", ".ico"]
+}));
 // setting static directory
 app.use(express.static(path.join(__dirname, 'public')));
 // setting cache control to do not allow any disk cache 
@@ -207,50 +201,48 @@ app.use(express.json());
 // using compression middleware to compress response if client accept
 app.use(compression({ filter: shouldCompress }));
 
-// get methods
-// send simple text, url: http://localhost:3000
-app.get('/', function (req, res) {res.send("Hello!")}); 
-// using input params, url: http://localhost:3000/id/ENTER_A_NUMBER
+// express method showcase
+// redirect
+app.get('/', function (req, res) {res.redirect('/home')}); 
+// params and send text
 app.get('/id/:id', function (req, res) {res.send("Your ID is "+req.params.id)}); 
-// send file, url: http://localhost:3000/image
+// send file
 app.get('/image', function (req, res) {res.sendFile(path.join(__dirname,'/public/images/trollface.png'))}); 
-// inject and render view, url: http://localhost:3000/user
-app.get('/user', function(req, res) {
-    res.render('index',{username:req.session.username, message:req.session.message});
-});
 
-// post methods
-// collecting username and set message, triggered by /user
-app.post('/login', function(req, res) {
-    var username = req.body.username.trim();
-	var password = req.body.password.trim();
-    if(req.session.loggedin) {
-        req.session.message = "you've already logged in...";
-    } else if (username && password==="123"){
-        req.session.loggedin = true;
-        req.session.username = username;
-        req.session.message = "you're now logged in";
+// view routes
+app.get('/home', async function(req, res) {
+    const username = req.session?.username?.trim();
+    if(username) {
+        let data = await generalModel.getAllMemo();
+        res.render('index',{login: true, message: `All latest memo, total ${data.length} memos`, data});
     } else {
-        req.session.message = "wrong password";
+        let data = await generalModel.getThreeMemo();
+        res.render('index',{login: false, message: 'Latest 3 memo, login to view more', data});
     }
-    res.redirect('/user');
-}); 
-// removing username and set message, triggered by /user
-app.post('/logout', function(req, res) {
-    if(req.session.loggedin) {
-        req.session.loggedin = false;
-        req.session.username = "";
-        req.session.message = "you're now logged out";
-    } else{
-        req.session.message = "you haven't logged in yet...";
+});
+app.get('/memo', async function(req, res) {
+    const username = req.session?.username?.trim();
+    if(username) {
+        let data = await generalModel.getUserMemo(username);
+        res.render('memo',{login: true, message:`Welcome ${username}, here are your memos`, data});
+    } else {
+        res.render('memo',{login: false, message:'Login to create memo', data:[]});
     }
-    res.redirect('/user');
-}); 
+});
+app.get('/login', function(req, res) {
+    const username = req.session?.username?.trim();
+    if(username) {
+        res.redirect('/memo');
+    } else {
+        res.render('login',{message:'', messageColor:'black'});
+    }
+});
 
 // api routes
 app.use('/api', apiRoutes);
+
 // auth routes
-// view routes
+app.use('/auth', authRoutes);
 
 // setup lightship for graceful shutdown and health check
 const lightship = await createLightship();
@@ -290,8 +282,9 @@ server.listen(PORT, async function () {
     }
 
     try {
-        const sqlRes = await getSQL(MS.statements.getCount, null);
-        console.log(`[INFO] current user in databse: ${sqlRes?.[0]?.count??'Unknown'}`);
+        const userCount = await generalModel.getUserCount();
+        console.log(`[INFO] current user in databse: ${userCount??'Unknown'}`);
+        // console.log(await generalModel.getAllMemo());
     } catch(err) {
         console.error(`[ERROR] (mysql) ${err}`);
     }
@@ -310,9 +303,9 @@ server.listen(PORT, async function () {
 //     const time = moment().utcOffset(UTC_OFFSET).format('YYYY-MM-DD HH:mm:ss');
 
 //     console.log(`[START] app listening on port ${PORT} (${time})`);
-//     getSQL(MS.statements.getCount, null)
+//     generalModel.getUserCount()
 //     .then((res) => {
-//         console.log(`[INFO] current user in databse: ${res[0].count}`);
+//         console.log(`[INFO] current user in databse: ${res}`);
 //     })
 //     .catch((err) => {
 //         console.error(err);

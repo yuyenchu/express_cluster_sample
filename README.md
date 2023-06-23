@@ -6,7 +6,7 @@ This is an express server ready compatible with cluster mode and docker, using e
 download the project with git clone or zip
 
 ## Usage
-### - Native mode
+### - Native mode (suggest for Windows & macOS)
 - Setup
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
   2. run ```npm i``` to install npm required packages
@@ -19,7 +19,7 @@ download the project with git clone or zip
 - To stop server
   1. stop express server by entering ```pm2 stop sample-cluster-server```
   2. retart server with ```pm2 restart sample-cluster-server``` if needed
-### - Docker mode
+### - Docker mode (suggest for linux)
 - Setup
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
   2. run ```npm run build``` to build docker image

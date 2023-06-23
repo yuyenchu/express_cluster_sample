@@ -7,6 +7,10 @@ initialize.sql
 **/.DS_Store
 **/._.DS_Store
 
+# db data
+mysql/data/
+redis/data/
+
 # Logs
 logs
 *.log
