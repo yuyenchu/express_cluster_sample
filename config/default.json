@@ -33,8 +33,22 @@
         "window": 300000,
         "delayAfter": 10,
         "delay": 500,
-        "maxDelay": 3000,
+        "maxDelay": 1000,
         "skipFail": false,
         "skipSuccess": false
+    },
+    "csp": {
+        "scriptSrc": [
+            "unpkg.com", 
+            "cdnjs.cloudflare.com"
+        ]
+    },
+    "jwt": {
+        "secret": "Secret123$%^",
+        "length": 64,
+        "extendAccess": false,
+        "extendRefresh": false,
+        "accessExpire": 120,
+        "refreshExpire": 2592000
     }
 }

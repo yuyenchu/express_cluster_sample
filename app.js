@@ -4,10 +4,10 @@ import slowDown     from 'express-slow-down';
 import session      from 'express-session';
 import chokidar     from 'chokidar';
 import compression  from 'compression';
+import cookieParser from 'cookie-parser';
 import cors         from 'cors';
 import fs           from 'fs';    
 import helmet       from 'helmet';
-import RedisClient  from "ioredis";
 import moment       from 'moment';
 import morgan       from 'morgan';
 import fetch        from 'node-fetch';
@@ -31,6 +31,10 @@ import authRoutes   from './routers/auth/authRouter.js';
 
 // import model for general use
 import generalModel from './models/generalModel.js';
+import redisClient  from './models/redis.js';
+
+// import custom middleware
+import { renewAccessToken } from './middlware/jwtAuth.js';
 
 var app = express();
 
@@ -38,7 +42,7 @@ var app = express();
 import config from 'config';
 
 const PORT      = config.get('port');
-const REDIS     = config.get('redis');
+const CSP       = config.get('csp');
 const SESSION   = config.get('session');
 const RATE_LIMIT= config.get('rateLimit');
 const SLOW_DOWN = config.get('slowDown');
@@ -81,19 +85,6 @@ if (USE_SSL) {
         });
 }
 
-// create redis client connection
-const redisClient = new RedisClient({
-    host: REDIS.host,
-    port: REDIS.port,
-    ...(REDIS.password && {password: REDIS.password}),
-});
-redisClient.on('error', function (err) {
-    console.log(`[ERROR] Could not establish a connection with redis: ${err}`);
-});
-redisClient.on('connect', function (err) {
-    console.log('[INFO] Connected to redis successfully');
-});
-
 // create a rotating write stream for logger
 let accessLogStream = rfs.createStream('access.log', {
     interval: RTFS_ROTATE,
@@ -107,6 +98,7 @@ const shouldCompress = (req, res) => {
     }
     return compression.filter(req, res);
 }
+
 // app middleware setup
 // using ejs views for dynamic pages
 app.set('views', path.join(__dirname, '/views'))
@@ -125,14 +117,12 @@ app.use(helmet({
         directives: {
             "script-src": [
                 "'self'", 
-                "'unsafe-inline'", 
-                "unpkg.com", 
-                "yhs473.tplinkdns.com", 
-                "cdnjs.cloudflare.com"
+                "'unsafe-inline'",
+                ...CSP.scriptSrc,
             ],
             "script-src-attr": [
                 "'self'", 
-                "'unsafe-inline'"
+                "'unsafe-inline'",
             ]
         },
     },
@@ -147,7 +137,7 @@ app.use(session({
     saveUninitialized: SESSION.saveUninit,
     cookie: {
         secure: USE_SSL, // if true only transmit cookie over https
-        httpOnly: false, // if true prevent client side JS from reading the cookie 
+        httpOnly: true, // if true prevent client side JS from reading the cookie 
         maxAge: SESSION.maxAge // session max age in miliseconds
     }
 }));
@@ -198,6 +188,7 @@ app.use((req, res, next) => {
 // using parsing middlewares for urlencoded and json payloads 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(cookieParser());
 // using compression middleware to compress response if client accept
 app.use(compression({ filter: shouldCompress }));
 
@@ -220,7 +211,7 @@ app.get('/home', async function(req, res) {
         res.render('index',{login: false, message: 'Latest 3 memo, login to view more', data});
     }
 });
-app.get('/memo', async function(req, res) {
+app.get('/memo', renewAccessToken, async function(req, res) {
     const username = req.session?.username?.trim();
     if(username) {
         let data = await generalModel.getUserMemo(username);
@@ -238,11 +229,11 @@ app.get('/login', function(req, res) {
     }
 });
 
+// auth routes
+app.use('/auth', authRoutes);
 // api routes
 app.use('/api', apiRoutes);
 
-// auth routes
-app.use('/auth', authRoutes);
 
 // setup lightship for graceful shutdown and health check
 const lightship = await createLightship();

@@ -8,6 +8,8 @@ services:
     volumes:  
       - "${MYSQL_STORE}:/var/lib/mysql"
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
     networks:
       - web_network
     environment:

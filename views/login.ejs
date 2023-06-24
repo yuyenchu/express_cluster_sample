@@ -3,6 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>Login</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
         <link href="/css/style.css" rel="stylesheet" type="text/css" >
     </head>
     <body>
@@ -16,8 +18,18 @@
         </header>
         <div class="spinner"></div>
         <main id="swup" class="transition-fade">
-            <div>
-                <div style="border: 1px solid #000; border-radius: 3px; margin:20px; padding: 10px;">
+            <div class="login-container">
+                <div class="login-bg" style="display: none">
+                    <div class="box signin">
+                        <h2>Already have an account?</h2>
+                        <button class="signinBtn">Sign in</button>
+                    </div>
+                    <div class="box signup">
+                        <h2>Don't have an account?</h2>
+                        <button class="signupBtn">Sign up</button>
+                    </div>
+                </div>
+                <div class="form-container">
                     <h3>
                         Login form
                     </h3>
@@ -27,7 +39,7 @@
                         <button type="submit">Login</button>
                     </form>
                 </div>
-                <div style="border: 1px solid #000; border-radius: 3px; margin:20px; padding: 10px;">
+                <div class="form-container">
                     <h3>
                         Signup form
                     </h3>
