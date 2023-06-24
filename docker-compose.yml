@@ -8,8 +8,8 @@ services:
     volumes:  
       - "${MYSQL_STORE}:/var/lib/mysql"
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    ports:
-      - "3306:3306"
+    # ports:
+    #   - "3306:3306"
     networks:
       - web_network
     environment:
@@ -25,8 +25,8 @@ services:
     volumes:
       - "${REDIS_STORE}:/data"
       - ./redis/redis.conf:/etc/redis/redis.conf:ro
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"
     networks:
       - web_network
 
