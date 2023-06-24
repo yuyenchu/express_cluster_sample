@@ -50,21 +50,12 @@
             </div>
         </main>
         <script>
-            const signUpButton = document.querySelector('#signUp');
-            const signInButton = document.querySelector('#signIn');
-            const container = document.querySelector('#container');
-
-            if (signUpButton && signInButton && container){
-                signUpButton.addEventListener('click', () => {
-                    console.log("add right-panel-active")
-                    container.classList.add("right-panel-active");
-                });
-                
-                signInButton.addEventListener('click', () => {
-                    console.log("remove right-panel-active")
-                    container.classList.remove("right-panel-active");
-                });
-            }
+            document.querySelector('#signUp').addEventListener('click', () => {
+                container.classList.add("right-panel-active");
+            });
+            document.querySelector('#signIn').addEventListener('click', () => {
+                container.classList.remove("right-panel-active");
+            });
         </script>
     </body>
 </html>
