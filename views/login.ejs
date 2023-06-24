@@ -18,41 +18,53 @@
         </header>
         <div class="spinner"></div>
         <main id="swup" class="transition-fade">
-            <div class="login-container">
-                <div class="login-bg" style="display: none">
-                    <div class="box signin">
-                        <h2>Already have an account?</h2>
-                        <button class="signinBtn">Sign in</button>
-                    </div>
-                    <div class="box signup">
-                        <h2>Don't have an account?</h2>
-                        <button class="signupBtn">Sign up</button>
+            <div id="container" class="container">
+                <div class="overlay-container">
+                    <div class="overlay">
+                        <div class="box overlay-left">
+                            <h2>Already have an account?</h2>
+                            <button id="signIn" class="signinBtn">Sign in</button>
+                        </div>
+                        <div class="box overlay-right">
+                            <h2>Don't have an account?</h2>
+                            <button id="signUp" class="signupBtn">Sign up</button>   
+                        </div>
                     </div>
                 </div>
-                <div class="form-container">
-                    <h3>
-                        Login form
-                    </h3>
+                <div class="form-container signin-container">
                     <form action="/auth/login" method="POST">
+                        <h2>Login form</h2>
                         <input type="text" name="username" placeholder="username"/>
                         <input type="text" name="password" placeholder="password"/>
                         <button type="submit">Login</button>
                     </form>
                 </div>
-                <div class="form-container">
-                    <h3>
-                        Signup form
-                    </h3>
+                <div class="form-container signup-container">
                     <form action="/auth/register" method="POST">
+                        <h2>Signup form</h2>
                         <input type="text" name="username" placeholder="enter a username"/>
                         <input type="text" name="password" placeholder="enter a password"/>
                         <button type="submit">Signup</button>
                     </form>
                 </div>
             </div>
-            <h3 style="color: <%= messageColor %>;">
-                <%= message %>
-            </h3>
         </main>
+        <script>
+            const signUpButton = document.querySelector('#signUp');
+            const signInButton = document.querySelector('#signIn');
+            const container = document.querySelector('#container');
+
+            if (signUpButton && signInButton && container){
+                signUpButton.addEventListener('click', () => {
+                    console.log("add right-panel-active")
+                    container.classList.add("right-panel-active");
+                });
+                
+                signInButton.addEventListener('click', () => {
+                    console.log("remove right-panel-active")
+                    container.classList.remove("right-panel-active");
+                });
+            }
+        </script>
     </body>
 </html>
