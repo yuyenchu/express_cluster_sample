@@ -30,8 +30,8 @@
     "session": {
         "secret": string, // session secret to be used, 256 characters is recommended
         "maxAge": number, // session max age in milliseconds
-        "resave": false, // force save back to store
-        "saveUninit": false // force save uninitialized session to sore
+        "resave": boolean, // force save back to store
+        "saveUninit": boolean // force save uninitialized session to sore
     },
     //* config for json web token authorization *//
     //* see https://www.npmjs.com/package/jsonwebtoken#usage for more details */
