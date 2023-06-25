@@ -19,9 +19,9 @@
             <nav id="swup-nav">
                 <a href="/home" class="inactive">Home</a>
                 <a href="/memo" class="active">Memo</a>
-                <% if(login) { %>
+                <% if(login) { -%>
                     <a href="#" class="login" onclick="logout()">Logout</a>
-                <% } else{ %>
+                <% } else{ -%>
                     <a href="/login" class="login">Login</a>
                 <% } %>
             </nav>
@@ -65,20 +65,18 @@
                     </thead>
                     <tbody>
                         <% for(var i = 0; i < data.length; i++) { %>
-                            <tr>
-                                <th><span><%= data[i].member %></span></th>
-                                <td ><span style="text-decoration: <%= data[i].done?'line-through':'none' %>;"><%= data[i].task %></span></td>
-                                <td ><h6 class="priority"><span class="<%= data[i].priority %>"><%= data[i].priority %> priority</span></h6></td>
-                                <td >
-                                    <a href="#!" data-mdb-toggle="tooltip" title="Done" onclick="markMemo(<%= data[i].id %>)">
-                                        <i class="fas fa-check fa-lg"></i>
-                                    </a>
-                                    <a href="#!" data-mdb-toggle="tooltip" title="Remove" onclick="deleteMemo(<%= data[i].id %>)">
-                                        <i class="fas fa-trash-alt fa-lg"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <% } %>                    
+                        <tr>
+                            <th><span><%= data[i].member %></span></th>
+                            <td><span style="text-decoration: <%= data[i].done?'line-through':'none' -%>;"><%= data[i].task %></span></td>
+                            <td><h6 class="priority"><span class="<%= data[i].priority %>"><%= data[i].priority %> priority</span></h6></td>
+                            <td>
+                                <a href="#!" data-mdb-toggle="tooltip" title="Done" onclick="markMemo(<%= data[i].id %>)">
+                                    <i class="fas fa-check fa-lg"></i></a>
+                                <a href="#!" data-mdb-toggle="tooltip" title="Remove" onclick="deleteMemo(<%= data[i].id %>)">
+                                    <i class="fas fa-trash-alt fa-lg"></i></a>
+                            </td>
+                        </tr>
+                        <% } -%>                    
                     </tbody>
                 </table>
             </div>
