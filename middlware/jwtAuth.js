@@ -71,7 +71,7 @@ function validateJWT(req, res, next) {
 }
 
 function renewAccessToken(req, res, next) {
-    if (!req?.session?.username) next();
+    if (!req?.session?.username) return next();
 
     const { accessToken, refreshToken } = req.cookies;
     if (!accessToken || !refreshToken) return res.status(403).end("JWT missing");
