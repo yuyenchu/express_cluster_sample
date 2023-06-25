@@ -16,7 +16,11 @@
             <nav id="swup-nav">
                 <a href="/home" class="inactive">Home</a>
                 <a href="/memo" class="inactive">Memo</a>
-                <a href="/login" class="login">Login</a>
+                <% if(login) { %>
+                    <a href="#" class="login" onclick="logout()">Logout</a>
+                <% } else{ %>
+                    <a href="/login" class="login">Login</a>
+                <% } %>
             </nav>
         </header>
         <div class="spinner"></div>

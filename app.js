@@ -245,11 +245,12 @@ app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 app.use(function(req, res, next) {
+    const username = req?.session?.username;
     res.status(404);
   
     // respond with html page
     if (req.accepts('html')) {
-        return res.render('error', { status: 404, error: {message:`${req.url} not found`} });
+        return res.render('error', {login: username!==undefined, status: 404, error: {message:`${req.url} not found`}});
     }
   
     // respond with json
@@ -265,11 +266,12 @@ app.use(function(err, req, res, next){
     // we may use properties of the error object
     // here and next(err) appropriately, or if
     // we possibly recovered from the error, simply next().
+    const username = req?.session?.username;
     const error = (app.get('env')==='development')?err:{message: 'Server Error'};
     res.status(err.status || 500);
     
     if (req.accepts('html')) {
-        return res.render('error', { status: 500, error });
+        return res.render('error', {login: username!==undefined, status: 500, error});
     }
 
     if (req.accepts('json')) {
