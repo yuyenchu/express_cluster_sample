@@ -13,6 +13,7 @@ import morgan       from 'morgan';
 import fetch        from 'node-fetch';
 import path         from 'path';
 import rfs          from 'rotating-file-stream';
+import favicon      from 'serve-favicon';
 // plugin for moment, only need import
 import momentDurationFormatSetup from "moment-duration-format"; 
 import { unless }           from 'express-unless';
@@ -36,8 +37,6 @@ import redisClient  from './models/redis.js';
 // import custom middleware
 import { renewAccessToken } from './middlware/jwtAuth.js';
 
-var app = express();
-
 // reading configurations from config directory
 import config from 'config';
 
@@ -52,8 +51,10 @@ const SSL_CERT  = config.get('sslCert');
 const SSL_CHAIN = config.get('sslChain');
 const UTC_OFFSET  = config.get('utcOffset');
 const RTFS_ROTATE = config.get('rtfsRotate');
+const DEFAULT_TIMEOUT = config.get('defaultTimeout');
 
-// https server
+// express server
+var app = express();
 var server = app;
 if (USE_SSL) {
     const https = await import('https');
@@ -83,7 +84,11 @@ if (USE_SSL) {
                 server.setSecureContext(readCertsSync());
             }
         });
+} else {
+    const http = await import('http');
+    server = http.createServer(app);
 }
+server.setTimeout(DEFAULT_TIMEOUT);
 
 // create a rotating write stream for logger
 let accessLogStream = rfs.createStream('access.log', {
@@ -165,7 +170,11 @@ const slowDownMiddleware = slowDown({
     maxDelayMs: SLOW_DOWN.maxDelay,
     skipFailedRequests: SLOW_DOWN.skipFail,
     skipSuccessfulRequests: SLOW_DOWN.skipSuccess,
-    onLimitReached: (req, res, options) => {console.log('delay:',req.slowDown.delay)},
+    onLimitReached: (req, res, options) => {
+        const username = req?.session?.username??"";
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.log(`[INFO] ${ip}/${username} delay ${req.slowDown.delay}ms`)
+    },
     store: new RedisStoreRate({
         client: redisClient,
         prefix: 'sd:',
@@ -179,6 +188,7 @@ app.use(slowDownMiddleware.unless({
 }));
 // setting static directory
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 // setting cache control to do not allow any disk cache 
 // to prevent reload page without login
 app.use((req, res, next) => {
@@ -234,6 +244,40 @@ app.use('/auth', authRoutes);
 // api routes
 app.use('/api', apiRoutes);
 
+app.use(function(req, res, next) {
+    res.status(404);
+  
+    // respond with html page
+    if (req.accepts('html')) {
+        return res.render('error', { status: 404, error: {message:`${req.url} not found`} });
+    }
+  
+    // respond with json
+    if (req.accepts('json')) {
+        return res.json({ error: 'Not found' });
+    }
+  
+    // default to plain-text. send()
+    res.type('txt').send('Not found');
+});
+
+app.use(function(err, req, res, next){
+    // we may use properties of the error object
+    // here and next(err) appropriately, or if
+    // we possibly recovered from the error, simply next().
+    const error = (app.get('env')==='development')?err:{message: 'Server Error'};
+    res.status(err.status || 500);
+    
+    if (req.accepts('html')) {
+        return res.render('error', { status: 500, error });
+    }
+
+    if (req.accepts('json')) {
+        return res.json({ error });
+    }
+  
+    res.type('txt').send('Server Error');
+});
 
 // setup lightship for graceful shutdown and health check
 const lightship = await createLightship();

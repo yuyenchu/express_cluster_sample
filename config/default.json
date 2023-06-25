@@ -1,5 +1,12 @@
 {
     "port": 3000,
+    "utcOffset": 0,
+    "useSSL": true,
+    "sslKey": "cert/live/yhs473.tplinkdns.com/privkey.pem",
+    "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
+    "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
+    "rtfsRotate": "1d",
+    "defaultTimeout": 120000,
     "mysql": {
         "host": "localhost",
         "user": "root",
@@ -18,13 +25,14 @@
         "resave": false,
         "saveUninit": false
     },
-    "utcOffset": 0,
-    "useSSL": true,
-    "sslKey": "cert/live/yhs473.tplinkdns.com/privkey.pem",
-    "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
-    "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
-    "rtfsRotate": "1d",
-    "useJWT": false,
+    "jwt": {
+        "secret": "Secret123$%^",
+        "length": 64,
+        "extendAccess": false,
+        "extendRefresh": false,
+        "accessExpire": 120,
+        "refreshExpire": 2592000
+    },
     "rateLimit": {
         "window": 300000,
         "maxReq": 10
@@ -42,13 +50,5 @@
             "unpkg.com", 
             "cdnjs.cloudflare.com"
         ]
-    },
-    "jwt": {
-        "secret": "Secret123$%^",
-        "length": 64,
-        "extendAccess": false,
-        "extendRefresh": false,
-        "accessExpire": 120,
-        "refreshExpire": 2592000
     }
 }

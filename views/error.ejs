@@ -1,0 +1,29 @@
+<!-- views/login.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Error</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <script defer src="/script/swup.min.js"></script>
+        <script defer src="/script/swup-preload.min.js"></script>
+        <script defer src="/script/script.js"></script>
+        <link href="/css/style.css" rel="stylesheet" type="text/css" >
+    </head>
+    <body>
+        <header>
+            <a href="#" class="logo">Logo</a>
+            <nav id="swup-nav">
+                <a href="/home" class="inactive">Home</a>
+                <a href="/memo" class="inactive">Memo</a>
+                <a href="/login" class="login">Login</a>
+            </nav>
+        </header>
+        <div class="spinner"></div>
+        <main id="swup" class="transition-fade">
+            <h1 style="color: #C6C6C6; margin-top: 80px;">
+                Error <%= status %> - <%= error?.message??JSON.stringify(error?.err)??'' %>
+            </h1>
+        </main>
+    </body>
+</html>
