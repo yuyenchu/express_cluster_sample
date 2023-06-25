@@ -2,26 +2,17 @@
 ## About
 This is an express server ready compatible with cluster mode and docker, using ejs for frontend login/out app.
 
-<<<<<<< HEAD
 ## Installation guide
 Download the project with git clone or zip
 
 ## Development setup
 This project offers **2 modes** for development, both should work in most cases. You can either run natively if you already have a development environment ready on local, **or** you can run the project with docker, which should maintain a cleaner environment.
 ### - Native mode (suggest for Windows & macOS)
-=======
-## Installation guide:
-download the project with git clone or zip
-
-## Usage
-### - Native mode
->>>>>>> 2258311 (first commit)
 - Setup
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
   2. run ```npm i``` to install npm required packages
   3. run ```npm i pm2 -g``` to install pm2
 - To start server
-<<<<<<< HEAD
   1. run ```pm2 start ecosystem.config.js```,  you can enable `watch` by uncommenting line 9 if needed
   2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
   3. run mysql and redis on local
@@ -68,34 +59,11 @@ It is recommended to use docker for production, but you can also run natively if
 - config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(when `NODE_ENV=production`) `production.json` will be loaded if exists
   - NOTE: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
 - create a `.env` file to store environment variables for docker compose, which should include `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
-=======
-  1. run ```pm2 start ecosystem.config.js```
-  2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
-  3. (optional) install docker compose and then run ```docker compose -f docker-compose.dev.yml up -d``` to start other services needed for development
-  4. go to [localhost:3000](https://localhost:3000) and edit app.js to see what changes
-- To stop server
-  1. stop express server by entering ```pm2 stop sample-cluster-server```
-  2. retart server with ```pm2 restart sample-cluster-server``` if needed
-### - Docker mode
-- Setup
-  1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
-  2. run ```npm run build``` to build docker image
-- To start server
-  1. run ```docker compose up -d``` to start all services  
-  2. go to [localhost:3000](https://localhost:3000)
-- To stop server
-  1. run ```docker compose down``` to stop all services  
-
-## Config
-- config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(`NODE_ENV=production`) `production.json` will be loaded
-  - NOTE: remember to replace secrets and hostnames in `production.json`, fields in it are just template, they are **NOT SAFE** for actual production
->>>>>>> 2258311 (first commit)
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
 
 ## HTTPS
-<<<<<<< HEAD
 This project use certbot to obtain ssl certificates, following are instructions about how to use it.\
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
 - to use certbot to generate ssl certificates, run ```docker run --rm  -v /etc/letsencrypt:/etc/letsencrypt  -p 80:80 -ti certbot/certbot certonly --standalone --email EMAIL_ADDRESS --agree-tos --preferred-challenges http -d DOMAIN_NAME```
@@ -103,9 +71,6 @@ This project use certbot to obtain ssl certificates, following are instructions 
 - **or** you can run `certbot.sh` to do the same thing
   - NOTE: remember to change the email address and domain name in `certbot.sh`
 - for **linux** users, run `crontab_cert.sh` to enable auto renew
-=======
-- to use certbot to generate ssl certificates, run ```docker run --rm  -v /etc/letsencrypt:/etc/letsencrypt  -p 80:80 -ti certbot/certbot certonly --standalone --email EMAIL_ADDRESS --agree-tos --preferred-challenges http -d DOMAIN_NAME```
->>>>>>> 2258311 (first commit)
 
 ## Tools
 - [Postman](https://www.postman.com/downloads/): API debugging
@@ -119,11 +84,7 @@ This project use certbot to obtain ssl certificates, following are instructions 
 - [Docker Docs](https://docs.docker.com/get-started/02_our_app/)
 - [Docker Compose Docs](https://docs.docker.com/compose/gettingstarted/)
 - [MySQL Image](https://hub.docker.com/_/mysql)
-<<<<<<< HEAD
 - [Redis Image](https://hub.docker.com/_/redis)
 - [Express session store](https://medium.com/swlh/session-management-in-nodejs-using-redis-as-session-store-64186112aa9)
 - [Express MVC structure](https://blog.logrocket.com/building-structuring-node-js-mvc-application/)
 - [JWT Redis](https://chaitanay-aggarwal.medium.com/authentication-with-jwt-redis-and-nodejs-e734e923fd39)
-=======
-- [Redis Image](https://hub.docker.com/_/redis)
->>>>>>> 2258311 (first commit)

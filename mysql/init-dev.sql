@@ -1,27 +1,18 @@
 CREATE DATABASE userDB;
 USE userDB;
 CREATE TABLE users (
-<<<<<<< HEAD
     `username` varchar(80) NOT NULL,
     `password` varchar(41) NOT NULL,
     PRIMARY KEY (`username`)
 );
 INSERT INTO users 
     (`username`, `password`)
-=======
-    username varchar(80) PRIMARY KEY,
-    password varchar(41) NOT NULL
-);
-INSERT INTO users 
-    (username, password)
->>>>>>> 2258311 (first commit)
 VALUES 
     ('root', 'root'),
     ('user1', 'pass1'),
     ('user2', 'pass2'),
     ('user3', 'pass3');
 
-<<<<<<< HEAD
 CREATE TABLE memos (
     `id` int NOT NULL AUTO_INCREMENT, 
     `member` varchar(80) NOT NULL, 
@@ -39,5 +30,3 @@ VALUES
     ('user2', 'Office grocery shopping', False, 'low'),
     ('user3', 'Ask for Lunch to Clients', True, 'low'),
     ('root', 'Make payment to Bluedart', False, 'middle');
-=======
->>>>>>> 2258311 (first commit)
