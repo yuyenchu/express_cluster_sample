@@ -10,10 +10,10 @@ const redisClient = new RedisClient({
     ...(REDIS.password && {password: REDIS.password}),
 });
 redisClient.on('error', function (err) {
-    console.log(`[ERROR] Could not establish a connection with redis: ${err}`);
+    console.log(`[ERROR] (redis) Could not establish a connection with redis: ${err}`);
 });
 redisClient.on('connect', function (err) {
-    console.log('[INFO] Connected to redis successfully');
+    console.log(`[INFO] (redis) Connected to ${REDIS.host}:${REDIS.port} successfully`);
 });
 
 export default redisClient;

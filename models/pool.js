@@ -1,7 +1,13 @@
+import Joi from 'joi';
 import mysql from 'mysql2';
 import config from 'config';
 
 const MS = config.get('mysql');
+
+const STATEMENT_SCHEMA = Joi.object({    
+    query: Joi.string().required(),
+    fields: Joi.array().items(Joi.string()).required()
+});
 
 // create mysql connection pool
 const pool = mysql.createPool({
@@ -15,7 +21,7 @@ const pool = mysql.createPool({
 });
 
 async function query(statement, data, conn) {
-    const { query, fields } = statement;
+    const { query, fields } = await STATEMENT_SCHEMA.validateAsync(statement);
     const input = Array.isArray(data)?data:fields.map(i=>data[i]);
 
     if (conn) {

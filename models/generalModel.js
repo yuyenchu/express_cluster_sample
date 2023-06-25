@@ -1,3 +1,5 @@
+import Joi from 'joi';
+
 import Pool from './pool.js';
 
 async function getUserCount() {
@@ -32,6 +34,11 @@ async function getUserMemo(username) {
         query: "SELECT * FROM memos WHERE `member`=? ORDER BY `id` DESC;",
         fields: ['username']
     };
+
+    username = await Joi.string()
+        .max(80)
+        .required()
+        .validateAsync(username);
     const res = await Pool.query(statement, {username});
     return res[0];
 }

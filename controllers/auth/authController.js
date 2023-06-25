@@ -14,6 +14,12 @@ async function register(req, res) {
     if (req?.session?.username) {
         return res.sendStatus(403);
     }
+    if (username.length > 80 ) {
+        return res.render('login', {message: 'Username too long', messageColor: '#e4a11b'});
+    }
+    if (password.length > 41) {
+        return res.render('login', {message: 'Password too long', messageColor: '#e4a11b'});
+    }
 
     if (await authModel.hasUser({username})) {
         res.render('login', {message: 'Username already exist', messageColor: 'red'});
