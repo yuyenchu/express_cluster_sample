@@ -56,8 +56,9 @@ It is recommended to use docker for production, but you can also run natively if
   2. (optional) run ```pm2 unstartup``` to disable and remove startup configuration
 
 ## Config
-- config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(`NODE_ENV=production`) `production.json` will be loaded if exists
-  - NOTE: remember to replace secrets and hostnames in `production.json`, fields in it are just template, they are **NOT SAFE** for actual production
+- config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(when `NODE_ENV=production`) `production.json` will be loaded if exists
+  - NOTE: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
+- create a `.env` file to store environment variables for docker compose, which should include `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
