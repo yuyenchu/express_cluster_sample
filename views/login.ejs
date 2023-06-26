@@ -37,16 +37,16 @@
                 <div class="form-container signin-container">
                     <form action="/auth/login" method="POST">
                         <h2>Login form</h2>
-                        <input type="text" name="username" placeholder="username"/>
-                        <input type="text" name="password" placeholder="password"/>
+                        <input type="text" name="username" placeholder="username" required/>
+                        <input type="text" name="password" placeholder="password" required/>
                         <button type="submit">Login</button>
                     </form>
                 </div>
                 <div class="form-container signup-container">
                     <form action="/auth/register" method="POST">
                         <h2>Signup form</h2>
-                        <input type="text" name="username" placeholder="enter a username"/>
-                        <input type="text" name="password" placeholder="enter a password"/>
+                        <input type="text" name="username" placeholder="enter a username" required/>
+                        <input type="text" name="password" placeholder="enter a password" required/>
                         <button type="submit">Signup</button>
                     </form>
                 </div>
