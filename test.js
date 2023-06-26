@@ -47,3 +47,9 @@ let statement={
 // if (error) throw error;
 // const value = MS_STATEMENT_SCHEMA.validateAsync(statement);
 await Joi.number().min(2).validateAsync(2);
+
+import {statusCodeToReason} from './utils/statusCode.js'
+console.log(statusCodeToReason[404])
+console.log(statusCodeToReason[501])
+console.log(statusCodeToReason[401])
+console.log(statusCodeToReason[403])

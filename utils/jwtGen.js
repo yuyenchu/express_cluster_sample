@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import config from 'config';
 import { nanoid } from 'nanoid';
 
-import redisClient from '../../models/redis.js';
+import redisClient from '../models/redis.js';
 
 const JWT = config.get('jwt');
 

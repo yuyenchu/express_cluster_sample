@@ -37,6 +37,9 @@ import redisClient  from './models/redis.js';
 // import custom middleware
 import { renewAccessToken } from './middlware/jwtAuth.js';
 
+// import util 
+import { statusCodeToReason } from './utils/statusCode.js'
+
 // reading configurations from config directory
 import config from 'config';
 
@@ -267,11 +270,13 @@ app.use(function(err, req, res, next){
     // here and next(err) appropriately, or if
     // we possibly recovered from the error, simply next().
     const username = req?.session?.username;
-    const error = (app.get('env')==='development')?err:{message: 'Server Error'};
-    res.status(err.status || 500);
+    console.log(statusCodeToReason[err.status])
+    const status = statusCodeToReason[err.status] ? err.status : 500;
+    const error = ((app.get('env')==='development')&&err.message) ? err : { message: statusCodeToReason[status] };
+    res.status(status);
     
     if (req.accepts('html')) {
-        return res.render('error', {login: username!==undefined, status: 500, error});
+        return res.render('error', {login: username!==undefined, status, error});
     }
 
     if (req.accepts('json')) {

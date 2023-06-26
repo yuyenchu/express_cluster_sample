@@ -2,17 +2,18 @@ import config from 'config';
 
 import authModel from '../../models/authModel.js';
 import redisClient from '../../models/redis.js';
-import { generateJWT } from './utils.js';
+import { generateJWT } from '../../utils/jwtGen.js';
+import { AuthError } from '../../utils/errors.js';
 
 const USE_SSL = config.get('useSSL');
 
-async function register(req, res) {
+async function register(req, res, next) {
     const { username, password } = req.body;
     if (!username || !password) {
-        return res.sendStatus(400);
+        return next(new AuthError('username or password missing', 400, username, password));
     }
     if (req?.session?.username) {
-        return res.sendStatus(403);
+        return next(new AuthError('user already logged in', 403, username, password));
     }
     if (username.length > 80 ) {
         return res.render('login', {message: 'Username too long', messageColor: '#e4a11b'});
@@ -24,22 +25,18 @@ async function register(req, res) {
     if (await authModel.hasUser({username})) {
         res.render('login', {message: 'Username already exist', messageColor: 'red'});
     } else {
-        try{
-            await authModel.registerUser({username, password});
-        } catch(err){
-            console.error(err);
-        }
+        await authModel.registerUser({username, password});
         return login(req, res);
     }
 }
 
-async function login(req, res) {
+async function login(req, res, next) {
     const { username, password } = req.body;
     if (!username || !password) {
-        return res.sendStatus(400);
+        return next(new AuthError('username or password missing', 400, username, password));
     }
     if (req?.session?.username) {
-        return res.sendStatus(403);
+        return next(new AuthError('user already logged in', 403, username, password));
     }
 
     if (await authModel.checkUser({username, password})) {
@@ -60,9 +57,9 @@ async function login(req, res) {
     }
 }
 
-async function logout(req, res) {
+async function logout(req, res, next) {
     if (!req?.session?.username) {
-        return res.sendStatus(403);
+        return next(new AuthError('user not logged in', 403));
     }
 
     const { username } = req.session;
@@ -72,9 +69,9 @@ async function logout(req, res) {
     res.clearCookie("refreshToken");
 
     req.session.username = undefined;
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
         if (err) {
-            return console.log(err);
+            return next(new AuthError('cannot destroy session', 500, username));
         }
         res.redirect('/home');
     });
