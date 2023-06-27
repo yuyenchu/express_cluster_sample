@@ -1,6 +1,7 @@
 # config files
 config/*
 !config/default.json
+!config/production-sample.json
 !config/README.md
 cert/
 

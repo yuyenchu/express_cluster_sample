@@ -14,7 +14,8 @@ import fetch        from 'node-fetch';
 import path         from 'path';
 import rfs          from 'rotating-file-stream';
 import favicon      from 'serve-favicon';
-// plugin for moment, only need import
+import winston      from 'winston';
+// plugins that only need to be import
 import momentDurationFormatSetup from "moment-duration-format"; 
 import { unless }           from 'express-unless';
 import { createLightship }  from 'lightship';  
@@ -98,6 +99,32 @@ let accessLogStream = rfs.createStream('access.log', {
     interval: RTFS_ROTATE,
     path: path.join(__dirname, 'logs')
 })
+
+// create winston logger for error handling middleware
+const { combine, timestamp, label, printf } = winston.format;
+const errorLogger = winston.createLogger({
+    level: 'warn',
+    format: combine(
+        label({ label: process.env.INSTANCE_ID??process.env.NODE_APP_INSTANCE }),
+        timestamp(),
+        printf(({ level, message, ip, url, label, timestamp }) => {
+            if (typeof message.format === 'function') message = message.format();
+            return `(${label})${ip} - - [${timestamp}] [${level.toUpperCase()}] ${url} - ${message}`;
+        }),
+    ),
+    transports: [
+        new winston.transports.Console({
+            stderrLevels: ['error']
+        }),
+        new winston.transports.Stream({
+            level: 'error',
+            stream: rfs.createStream('error.log', {
+                interval: RTFS_ROTATE,
+                path: path.join(__dirname, 'logs')
+            })
+        })
+    ],
+});
 
 // compress middleware filter
 const shouldCompress = (req, res) => {
@@ -270,10 +297,12 @@ app.use(function(err, req, res, next){
     // here and next(err) appropriately, or if
     // we possibly recovered from the error, simply next().
     const username = req?.session?.username;
-    console.log(statusCodeToReason[err.status])
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const status = statusCodeToReason[err.status] ? err.status : 500;
     const error = ((app.get('env')==='development')&&err.message) ? err : { message: statusCodeToReason[status] };
+    
     res.status(status);
+    errorLogger.log({level: 'error', message: err, url: req.url, ip})
     
     if (req.accepts('html')) {
         return res.render('error', {login: username!==undefined, status, error});

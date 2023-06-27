@@ -39,6 +39,7 @@
     "path": "^0.12.7",
     "rate-limit-redis": "^2.1.0",
     "rotating-file-stream": "^3.1.0",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "winston": "^3.9.0"
   }
 }

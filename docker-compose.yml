@@ -33,6 +33,8 @@ services:
   web_server:
     image: web_server:latest
     restart: always
+    volumes:
+      - ./logs:/app/logs
     networks:
       - web_network
     depends_on:

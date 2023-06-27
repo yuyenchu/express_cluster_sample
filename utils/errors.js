@@ -7,6 +7,10 @@ class JWTError extends Error {
 
         Error.captureStackTrace(this, JWTError);
     }
+
+    format() {
+        return `JWTError: (${this.status}) ${this.message} ${JSON.stringify({accessToken: this.accessToken, refreshToken:this.refreshToken })}`;
+    }
 }
 
 class AuthError extends Error {
@@ -17,6 +21,10 @@ class AuthError extends Error {
         this.password = password;
 
         Error.captureStackTrace(this, AuthError);
+    }
+
+    format() {
+        return `AuthError: (${this.status}) ${this.message} ${JSON.stringify({username: this.username, password:this.password })}`;
     }
 }
 

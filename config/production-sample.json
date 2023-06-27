@@ -1,0 +1,53 @@
+{
+    "port": 80,
+    "utcOffset": 0,
+    "useSSL": true,
+    "sslKey": "cert/live/YOUR_DOMAIN/privkey.pem",
+    "sslCert": "cert/live/YOUR_DOMAINcert.pem",
+    "sslChain": "cert/live/YOUR_DOMAIN/fullchain.pem",
+    "rtfsRotate": "1d",
+    "defaultTimeout": 120000,
+    "mysql": {
+        "host": "mysqldb",
+        "user": "root",
+        "password" : "rootPassword12#$",
+        "database" : "userDB",
+        "connLimit": 10
+    },
+    "redis": {
+        "host": "redisdb",
+        "port" : 6379,
+        "password" : ""
+    },
+    "session": {
+        "secret": "256_CHARACTERS_SECRET",
+        "maxAge": 1800000,
+        "resave": false,
+        "saveUninit": false
+    },
+    "jwt": {
+        "secret": "256_CHARACTERS_SECRET",
+        "extendRefresh": false,
+        "refreshLength": 128,
+        "accessExpire": 600,
+        "refreshExpire": 2592000
+    },
+    "rateLimit": {
+        "window": 900000,
+        "maxReq": 30
+    },
+    "slowDown": {
+        "window": 900000,
+        "delayAfter": 30,
+        "delay": 200,
+        "maxDelay": 2000,
+        "skipFail": false,
+        "skipSuccess": false
+    },
+    "csp": {
+        "scriptSrc": [
+            "unpkg.com", 
+            "cdnjs.cloudflare.com"
+        ]
+    }
+}
