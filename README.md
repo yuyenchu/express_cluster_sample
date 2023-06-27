@@ -36,13 +36,13 @@ This project offers **2 modes** for development, both should work in most cases.
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
   2. run ```npm i``` to install npm required packages
   3. run ```npm i pm2 -g``` to install pm2
-- To start server
+- Sart server
   1. run ```pm2 start ecosystem.config.js```,  you can enable `watch` by uncommenting line 9 if needed
   2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
   3. run mysql and redis on local
   4. (optional) install docker compose and then run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development, you can skip **step 3** if you decide to follow this step
   5. go to [localhost:3000](http://localhost:3000)
-- To stop server
+- Stop server
   1. stop express server by entering ```pm2 stop sample-cluster-server```
   2. retart server with ```pm2 restart sample-cluster-server``` if needed
 ### - Docker mode (recommend for linux)
