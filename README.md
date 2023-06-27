@@ -48,13 +48,13 @@ This project offers **2 modes** for development, both should work in most cases.
 ### - Docker mode (recommend for linux)
 - Setup
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- To start server
+- Start server
   1. run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development
   2. run ```npm run dev``` or ```docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c "npm i pm2 -g && /bin/bash"``` to start interactive docker container
   3. inside the container, run ```cd /server && npm i``` to install packages 
   4. then run ```pm2 start ecosystem.config.cjs```, you can enable `watch` by uncommenting line 9 if needed
   5. go to [localhost:3000](http://localhost:3000)
-- To stop server
+- Stop server
   1. run ```pm2 stop ecosystem.config.cjs``` to stop server
   2. exit the container (this will also remove the container)
 ## Production setup
