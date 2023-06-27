@@ -1,13 +1,37 @@
 # Cluster Express Server
 ## About
-This is an express server ready compatible with cluster mode and docker, using ejs for frontend login/out app.
+This is an stateless express server ready for cluster mode and dockerization, with features including:
+- Frontend: using ejs for Server-Side Rendering (SSR) memo app and swup for page trainsition animation.
+- Authorization: provides both session and JWT, session for login status and JWT for api.
+- Database: use MySQL for related data, such as user info and memos, and Redis for cache data, such as session, store, and JWT refresh tokens.
+- Logging: using morgan for access log and winston for error log, both with rotating file stream.
+- Design pattern: using MVC (Model-View-Controller) design.
+- Docker: Dockerfile and docker-compose.yml are ready for deployment
 
 ## Installation guide
-Download the project with git clone or zip
+- Download the project with [git](https://git-scm.com/downloads) clone or zip
+```shell
+git clone https://github.com/yuyenchu/express_cluster_sample.git
+```
+
+- Install Node.js from [website](https://nodejs.org/en/download) or command
+```shell
+sudo apt update
+sudo apt install nodejs
+```
+- Or install Node Version Manager (NVM) instead
+```shell
+sudo apt install curl 
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash 
+source ~/.bashrc   
+nvm install node #install latest nodejs
+```
+
+- Install Docker following instructions on their [website](https://docs.docker.com/engine/install/)
 
 ## Development setup
 This project offers **2 modes** for development, both should work in most cases. You can either run natively if you already have a development environment ready on local, **or** you can run the project with docker, which should maintain a cleaner environment.
-### - Native mode (suggest for Windows & macOS)
+### - Native mode (recommend for Windows & macOS)
 - Setup
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
   2. run ```npm i``` to install npm required packages
@@ -21,7 +45,7 @@ This project offers **2 modes** for development, both should work in most cases.
 - To stop server
   1. stop express server by entering ```pm2 stop sample-cluster-server```
   2. retart server with ```pm2 restart sample-cluster-server``` if needed
-### - Docker mode (suggest for linux)
+### - Docker mode (recommend for linux)
 - Setup
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - To start server
@@ -88,3 +112,28 @@ This project use certbot to obtain ssl certificates, following are instructions 
 - [Express session store](https://medium.com/swlh/session-management-in-nodejs-using-redis-as-session-store-64186112aa9)
 - [Express MVC structure](https://blog.logrocket.com/building-structuring-node-js-mvc-application/)
 - [JWT Redis](https://chaitanay-aggarwal.medium.com/authentication-with-jwt-redis-and-nodejs-e734e923fd39)
+
+## TODO
+- [x] docker
+- [x] https & certbot
+- [x] session store
+- [x] access logging
+- [x] graceful shutdown (lightship)
+- [x] no down time certificate update
+- [x] rate limit
+- [x] slow down
+- [x] mysql table init
+- [x] ejs frontend
+- [x] swup page transition
+- [x] JWT
+- [x] model data typing & validating 
+- [x] error handling
+- [x] error page and logging
+- [ ] file upload
+- [ ] in-memory cache for common used data
+- [ ] typescript (maybe)
+- [ ] react / angular/ vue support (maybe)
+- [ ] heroku / aws deployment script
+- [ ] server monitoring 
+- [ ] unit testing scripts
+- [ ] kubernetes

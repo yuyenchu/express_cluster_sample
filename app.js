@@ -218,6 +218,7 @@ app.use(slowDownMiddleware.unless({
 }));
 // setting static directory
 app.use(express.static(path.join(__dirname, 'public')));
+// favicon serving middleware with caching
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 // setting cache control to do not allow any disk cache 
 // to prevent reload page without login
