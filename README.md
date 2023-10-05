@@ -111,7 +111,7 @@ sudo ufw-docker install
 sudo systemctl restart ufw
 sudo systemctl restart docker
 ```
-After ufw-docker is installed and restarted ufw and docker daemon, we can start setting up rules for our containers. For example, our express server is using port 8080 in `docker-compose.yml`
+After ufw-docker is installed and restarted ufw and docker daemon, we can start setting up rules for our containers. For example, our traefik service is using internal port 80 and 443 in `docker-compose.yml`
 ```shell
 # allow traefik container's port to host
 sudo ufw-docker allow "traefik" 80/tcp
@@ -140,6 +140,8 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [JWT Redis](https://chaitanay-aggarwal.medium.com/authentication-with-jwt-redis-and-nodejs-e734e923fd39)
 - [ufw-doker](https://ivonblog.com/posts/fix-ufw-docker/)
 
+## Reference
+- [github.com/chaifeng/ufw-docker](https://github.com/chaifeng/ufw-docker)
 ## TODO
 - [x] docker
 - [x] https & certbot

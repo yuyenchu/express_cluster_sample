@@ -45,7 +45,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web_server.rule=Host(`${DOMAIN_NAME}`)&&!Host(`web_server`)"
+      - "traefik.http.routers.web_server.rule=Host(`${DOMAIN_NAME}`)"
       - "traefik.http.routers.web_server.entrypoints=websecure"
       - "traefik.http.routers.web_server.tls.certresolver=web_resolver"
       - "traefik.http.services.web_server.loadbalancer.server.port=80"
