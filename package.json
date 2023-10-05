@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "pm2 start ecosystem.config.cjs",
-    "dev": "docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c \"npm i pm2 -g && /bin/bash\"",
+    "dev": "docker run -it --rm -v $PWD/:/server -w /server --net host --name node_server node:latest sh -c \"npm i pm2 -g && /bin/bash\"",
     "build": "docker build . -t web_server:latest",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cert": "docker run --rm  -v $PWD/cert:/etc/letsencrypt  -p 80:80 -it certbot/certbot certonly --standalone --email YOUR_EMAIL@gmail.com --agree-tos --preferred-challenges http -d YOUR_DOMAIN.com"

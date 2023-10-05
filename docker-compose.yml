@@ -31,17 +31,52 @@ services:
       - web_network
 
   web_server:
+    container_name: web_server
     image: web_server:latest
     restart: always
     volumes:
       - ./logs:/app/logs
+      - ./config:/app/config # allow hot swap config files
     networks:
       - web_network
     depends_on:
       - mysql
       - redis
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web_server.rule=Host(`${DOMAIN_NAME}`)&&!Host(`web_server`)"
+      - "traefik.http.routers.web_server.entrypoints=websecure"
+      - "traefik.http.routers.web_server.tls.certresolver=web_resolver"
+      - "traefik.http.services.web_server.loadbalancer.server.port=80"
+    expose:
+      - 80
+  
+  traefik:
+    image: traefik:v2.10
+    restart: always
     ports:
-      - 8080:80
+      - 8081:80
+      - 8080:443
+      - 8082:8080
+    networks:
+      - web_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik:/traefik
+    command:
+      - "--accesslog=true"
+      # - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.web_resolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.web_resolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.web_resolver.acme.email=${EMAIL_ADDRESS}"
+      - "--certificatesresolvers.web_resolver.acme.storage=/traefik/letsencrypt/acme.json"
+    container_name: traefik
 
 networks:
   web_network:

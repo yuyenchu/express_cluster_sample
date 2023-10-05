@@ -82,19 +82,45 @@ It is recommended to use docker for production, but you can also run natively if
 ## Config
 - config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(when `NODE_ENV=production`) `production.json` will be loaded if exists
   - NOTE: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
-- create a `.env` file to store environment variables for docker compose, which should include `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
+- create a `.env` file to store environment variables for docker compose, which should include the following:
+  -  `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
+  -  `DOMAIN_NAME` for letsencrypt acme challenge and traefik routing
+  -  `EMAIL_ADDRESS` for letsencrypt notification
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
 
 ## HTTPS
-This project use certbot to obtain ssl certificates, following are instructions about how to use it.\
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
+### Traefik
+By default, this project uses traefik to route https requests and auto renew ssl certificates with acme http challenge. For alternative, manual obtained ssl certificates are also supported using the server script, which will require some settings in config file.
+### Certbot 
+To use certbot to obtain ssl certificates, following are instructions about how to use it.\
 - to use certbot to generate ssl certificates, run ```docker run --rm  -v /etc/letsencrypt:/etc/letsencrypt  -p 80:80 -ti certbot/certbot certonly --standalone --email EMAIL_ADDRESS --agree-tos --preferred-challenges http -d DOMAIN_NAME```
   - NOTE: remember to change the email address and domain name in the command above
 - **or** you can run `certbot.sh` to do the same thing
   - NOTE: remember to change the email address and domain name in `certbot.sh`
 - for **linux** users, run `crontab_cert.sh` to enable auto renew
+
+## UFW
+If you are using UFW as your firewall, you might notice that it isn't working with docker. And that's because docker will alter the iptables for its internal routing. To fix this, we'll use ufw-docker from [chaifeng](https://github.com/chaifeng/ufw-docker) with following commands
+```shell
+sudo cp ufw-docker /usr/local/bin/ufw-docker
+sudo chmod +x /usr/local/bin/ufw-docker
+sudo ufw-docker install
+sudo systemctl restart ufw
+sudo systemctl restart docker
+```
+After ufw-docker is installed and restarted ufw and docker daemon, we can start setting up rules for our containers. For example, our express server is using port 8080 in `docker-compose.yml`
+```shell
+# allow traefik container's port to host
+sudo ufw-docker allow "traefik" 80/tcp
+sudo ufw-docker allow "traefik" 443/tcp
+# reload new config for ufw and docker
+sudo ufw reload
+sudo systemctl restart docker
+```
+To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the comments `# BEGIN UFW AND DOCKER` and `# END UFW AND DOCKER`, then finally remove `/usr/local/bin/ufw-docker`.
 
 ## Tools
 - [Postman](https://www.postman.com/downloads/): API debugging
@@ -112,6 +138,7 @@ This project use certbot to obtain ssl certificates, following are instructions 
 - [Express session store](https://medium.com/swlh/session-management-in-nodejs-using-redis-as-session-store-64186112aa9)
 - [Express MVC structure](https://blog.logrocket.com/building-structuring-node-js-mvc-application/)
 - [JWT Redis](https://chaitanay-aggarwal.medium.com/authentication-with-jwt-redis-and-nodejs-e734e923fd39)
+- [ufw-doker](https://ivonblog.com/posts/fix-ufw-docker/)
 
 ## TODO
 - [x] docker
@@ -129,11 +156,14 @@ This project use certbot to obtain ssl certificates, following are instructions 
 - [x] model data typing & validating 
 - [x] error handling
 - [x] error page and logging
-- [ ] file upload
-- [ ] in-memory cache for common used data
+- [ ] jsdoc api documentation
+- [ ] file upload and storing
+- [ ] server monitoring (lightship)
+- [x] traefik routing and acme challenge
+- [x] ufw docker firewall
+- [ ] unit testing scripts
+- [ ] in-memory cache for commonly used data
+- [ ] kubernetes
+- [ ] heroku / aws deployment script
 - [ ] typescript (maybe)
 - [ ] react / angular/ vue support (maybe)
-- [ ] heroku / aws deployment script
-- [ ] server monitoring 
-- [ ] unit testing scripts
-- [ ] kubernetes

@@ -345,7 +345,7 @@ server.listen(PORT, async function () {
     setTimeout(() => controller.abort(), 1000);
 
     try {
-        const res = await fetch('http://jsonip.com', { signal: controller.signal });
+        const res = await fetch('https://ipv4.jsonip.com', { signal: controller.signal });
         const data = await res.json();
         console.log(`[START] app listening on ${data.ip}:${PORT} (${time})`);
     } catch(err) {

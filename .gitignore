@@ -4,6 +4,7 @@ config/*
 !config/production-sample.json
 !config/README.md
 cert/
+traefik/letsencrypt/*
 
 # ds_store
 **/.DS_Store
