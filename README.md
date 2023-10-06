@@ -5,6 +5,8 @@ This is an stateless express server ready for cluster mode and dockerization, wi
 - Authorization: provides both session and JWT, session for login status and JWT for api.
 - Database: use MySQL for related data, such as user info and memos, and Redis for cache data, such as session, store, and JWT refresh tokens.
 - Logging: using morgan for access log and winston for error log, both with rotating file stream.
+- Reverse proxy: using traefik for internal routing and ssl certificate renewal
+- Tracing: using jaeger to monitor workflow combining with traefik
 - Design pattern: using MVC (Model-View-Controller) design.
 - Docker: Dockerfile and docker-compose.yml are ready for deployment
 
@@ -26,6 +28,11 @@ curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 source ~/.bashrc   
 nvm install node #install latest nodejs
 ```
+- Alternatively, install Bun instead of Node.js for better performance
+**NOTE**: Bun is still under developing and does not guarantee complete compability with Node.js.
+```
+curl -fsSL https://bun.sh/install | bash 
+```
 
 - Install Docker following instructions on their [website](https://docs.docker.com/engine/install/)
 
@@ -34,10 +41,12 @@ This project offers **2 modes** for development, both should work in most cases.
 ### - Native mode (recommend for Windows & macOS)
 - Setup
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
-  2. run ```npm i``` to install npm required packages
+  2. run ```npm i``` to install npm required packages \
+    *Bun alternative*: ```bun i```
   3. run ```npm i pm2 -g``` to install pm2
 - Sart server
-  1. run ```pm2 start ecosystem.config.js```,  you can enable `watch` by uncommenting line 9 if needed
+  1. run ```pm2 start ecosystem.config.js```,  you can enable `watch` by uncommenting line 9 if needed \
+    *Bun alternative*: replacing line 4 with ```bun app.js```
   2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
   3. run mysql and redis on local
   4. (optional) install docker compose and then run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development, you can skip **step 3** if you decide to follow this step
@@ -50,9 +59,12 @@ This project offers **2 modes** for development, both should work in most cases.
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - Start server
   1. run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development
-  2. run ```npm run dev``` or ```docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c "npm i pm2 -g && /bin/bash"``` to start interactive docker container
-  3. inside the container, run ```cd /server && npm i``` to install packages 
-  4. then run ```pm2 start ecosystem.config.cjs```, you can enable `watch` by uncommenting line 9 if needed
+  2. run ```npm run dev``` or ```docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c "npm i pm2 -g && /bin/bash"``` to start interactive docker container \
+    *Bun alternative*: ```npm run bun-dev``` or ```docker run -it --rm --init --ulimit memlock=-1:-1 -v $PWD/:/server --net host --name bun_server oven/bun:latest sh -c "/bin/bash"```
+  3. inside the container, run ```cd /server && npm i``` to install packages \
+    *Bun alternative*: ```cd /server && bun i```
+  4. then run ```pm2 start ecosystem.config.cjs```, you can enable `watch` by uncommenting line 9 if needed \
+    *Bun alternative*: ```bun run bun-start```
   5. go to [localhost:3000](http://localhost:3000)
 - Stop server
   1. run ```pm2 stop ecosystem.config.cjs``` to stop server
@@ -62,10 +74,18 @@ It is recommended to use docker for production, but you can also run natively if
 ### - Docker mode (recommended)
 - Build
   1. run ```npm run build``` or ```docker build . -t web_server:latest``` to build docker image
-  2. set environment variables for mysql and redis storage path, run ```export MYSQL_STORE=/PATH/TO/REDIS_STORE && export REDIS_STORE=/PATH/TO/REDIS_STORE``` 
+  2. configure environment variables in `.env` file based on th **Config** section below or run
+    ```
+    export MYSQL_STORE=/PATH/TO/REDIS_STORE 
+    export REDIS_STORE=/PATH/TO/REDIS_STORE
+    export DOMAIN_NAME=YOUR_DOMAIN_NAME 
+    export EMAIL_ADDRESS=YOUR_EMAIL@gmail.com
+    export LAN_SUBNET=LANE_IP/SUBNET_MASK
+    ``` 
+  3. enable ufw-docker following the **UFW** section below
 - Start server
   1. run ```docker compose up -d``` to start all services  
-  2. go to [localhost:3000](https://localhost:3000) or other url based on your configuration
+  2. go to [server.localhost:8080](http://server.localhost:8080) or other url based on your configuration
 - Stop server
   1. run ```docker compose down``` to stop all services  
 ### - Native mode
@@ -74,21 +94,25 @@ It is recommended to use docker for production, but you can also run natively if
 - Start server
   1. run ```pm2 start ecosystem.config.cjs --env production```
   2. run ```pm2 save``` to save the app list so it will respawn after reboot
-  3. go to [localhost:3000](https://localhost:3000) or other url based on your configuration
+  3. go to [localhost](https://localhost) or other url based on your configuration
 - Stop server
   1. run ```pm2 stop ecosystem.config.cjs``` to stop app
   2. (optional) run ```pm2 unstartup``` to disable and remove startup configuration
 
 ## Config
 - config files are stored in the `config` folder, by default `default.json` will be loaded, and for production(when `NODE_ENV=production`) `production.json` will be loaded if exists
-  - NOTE: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
+  - more info in `config/README.md`
+  - **NOTE**: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
 - create a `.env` file to store environment variables for docker compose, which should include the following:
   -  `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
   -  `DOMAIN_NAME` for letsencrypt acme challenge and traefik routing
   -  `EMAIL_ADDRESS` for letsencrypt notification
+  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui
+  -  `LAN_SUBNET`(optional) for traefik dashboard ip whitelist, so local network can connect
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
+- traefik basic auth users in `traefik/users/usersfile`
 
 ## HTTPS
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
@@ -162,6 +186,7 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [ ] file upload and storing
 - [ ] server monitoring (lightship)
 - [x] traefik routing and acme challenge
+- [x] jaeger tracing (badger local storage)
 - [x] ufw docker firewall
 - [ ] unit testing scripts
 - [ ] in-memory cache for commonly used data
@@ -169,3 +194,4 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [ ] heroku / aws deployment script
 - [ ] typescript (maybe)
 - [ ] react / angular/ vue support (maybe)
+- [ ] bun compatibility

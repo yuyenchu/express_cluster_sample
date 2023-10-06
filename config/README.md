@@ -62,7 +62,10 @@
     //* config for content secure policy in helmet middleware *//
     //* see https://helmetjs.github.io/#content-security-policy for more details */
     "csp": {
-        "scriptSrc": string[] // array of domain names to be allowed for html script src
+        "defaultSrc": string[], // array of domain names to be allowed for CSP default src
+        "scriptSrc": string[], // array of domain names to be allowed for html script src
+        "styleSrc": string[], // array of domain names to be allowed for html style src
+        "fontSrc": string[], // array of domain names to be allowed for html font src
     }
 }
 ```

@@ -5,8 +5,11 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "pm2 start ecosystem.config.cjs",
+    "start": "node app.js",
     "dev": "docker run -it --rm -v $PWD/:/server -w /server --net host --name node_server node:latest sh -c \"npm i pm2 -g && /bin/bash\"",
+    "bun-start": "bun app.js",
+    "bun-dev": "docker run -it --rm --init --ulimit memlock=-1:-1 -v $PWD/:/server -w /server --net host --name bun_server oven/bun:latest sh -c \"/bin/bash\"",
+    "serve": "pm2 start ecosystem.config.cjs",
     "build": "docker build . -t web_server:latest",
     "test": "echo \"Error: no test specified\" && exit 1",
     "cert": "docker run --rm  -v $PWD/cert:/etc/letsencrypt  -p 80:80 -it certbot/certbot certonly --standalone --email YOUR_EMAIL@gmail.com --agree-tos --preferred-challenges http -d YOUR_DOMAIN.com"

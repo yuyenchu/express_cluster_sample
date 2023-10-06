@@ -3,6 +3,8 @@
 **/logs/
 mysql/
 redis/
+traefik/
+jaeger/
 Dockerfile
 docker-compose.yml
 docker-compose.*.yml

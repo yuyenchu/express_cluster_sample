@@ -45,9 +45,23 @@
         "skipSuccess": false
     },
     "csp": {
+        "defaultSrc": [
+            "unpkg.com"
+        ],
         "scriptSrc": [
             "unpkg.com", 
             "cdnjs.cloudflare.com"
+        ],
+        "styleSrc": [
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu",
+            "unpkg.com"
+        ],
+        "fontSrc": [
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu"
         ]
     }
 }

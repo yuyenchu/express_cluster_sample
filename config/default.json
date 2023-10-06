@@ -1,7 +1,7 @@
 {
     "port": 3000,
     "utcOffset": 0,
-    "useSSL": true,
+    "useSSL": false,
     "sslKey": "cert/live/yhs473.tplinkdns.com/privkey.pem",
     "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
     "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
@@ -46,9 +46,23 @@
         "skipSuccess": false
     },
     "csp": {
+        "defaultSrc": [
+            "unpkg.com"
+        ],
         "scriptSrc": [
             "unpkg.com", 
             "cdnjs.cloudflare.com"
+        ],
+        "styleSrc": [
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu",
+            "unpkg.com"
+        ],
+        "fontSrc": [
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu"
         ]
     }
 }

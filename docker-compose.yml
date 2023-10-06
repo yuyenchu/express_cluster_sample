@@ -37,6 +37,8 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config # allow hot swap config files
+    # ports:
+    #   - "8081:80"
     networks:
       - web_network
     depends_on:
@@ -45,29 +47,63 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web_server.rule=Host(`${DOMAIN_NAME}`)"
-      - "traefik.http.routers.web_server.entrypoints=websecure"
-      - "traefik.http.routers.web_server.tls.certresolver=web_resolver"
+      # http route for localhost only
+      - "traefik.http.routers.web_server.rule=Host(`server.localhost`)"
+      - "traefik.http.routers.web_server.entrypoints=web"
+      - "traefik.http.routers.web_server.service=web_server"
       - "traefik.http.services.web_server.loadbalancer.server.port=80"
-    expose:
-      - 80
+      # https route for domain name 
+      - "traefik.http.routers.web_server_secure.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.web_server_secure.entrypoints=websecure"
+      - "traefik.http.routers.web_server_secure.service=web_server"
+      - "traefik.http.routers.web_server_secure.tls.certresolver=web_resolver"
+      - "traefik.http.services.web_server_secure.loadbalancer.server.port=80"
   
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+    ports:
+      - 16686:16686
+    networks:
+      - web_network
+    volumes:
+      - ./jaeger:/badger
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.${LOCAL_DOMAIN_NAME}`)"
+      - "traefik.http.routers.jaeger.service=jaeger"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+      # - "traefik.http.routers.jaeger.middlewares=ipfilter,auth"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+
   traefik:
-    image: traefik:v2.10
+    container_name: traefik
+    image: traefik:latest
     restart: always
     ports:
-      - 8081:80
-      - 8080:443
-      - 8082:8080
+      - 8080:80
+      - 8081:443
     networks:
       - web_network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik:/traefik
     command:
-      - "--accesslog=true"
       # - "--log.level=DEBUG"
-      - "--api.insecure=true"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/traefik/logs/access.log"
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -76,7 +112,14 @@ services:
       - "--certificatesresolvers.web_resolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.web_resolver.acme.email=${EMAIL_ADDRESS}"
       - "--certificatesresolvers.web_resolver.acme.storage=/traefik/letsencrypt/acme.json"
-    container_name: traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN_NAME}`)||PathPrefix(`/api`, `/dashboard`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.middlewares=ipfilter,auth"
+      - "traefik.http.middlewares.ipfilter.ipwhitelist.sourcerange=127.0.0.1, ${LAN_SUBNET}"
+      - "traefik.http.middlewares.auth.basicauth.usersfile=/traefik/users/usersfile" #admin:password
 
 networks:
   web_network:
