@@ -29,7 +29,7 @@ source ~/.bashrc
 nvm install node #install latest nodejs
 ```
 - Alternatively, install Bun instead of Node.js for better performance
-**NOTE**: Bun is still under developing and does not guarantee complete compability with Node.js.
+**NOTE**: Bun is still under development and does not guarantee complete compability with Node.js.
 ```
 curl -fsSL https://bun.sh/install | bash 
 ```
@@ -38,15 +38,15 @@ curl -fsSL https://bun.sh/install | bash
 
 ## Development setup
 This project offers **2 modes** for development, both should work in most cases. You can either run natively if you already have a development environment ready on local, **or** you can run the project with docker, which should maintain a cleaner environment.
-### - Native mode (recommend for Windows & macOS)
+### - Native mode
 - Setup
   1. install [Node.js](https://nodejs.org/en) or [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) (then install and use nodejs)
   2. run ```npm i``` to install npm required packages \
-    *Bun alternative*: ```bun i```
+    \* *Bun alternative*: ```bun i```
   3. run ```npm i pm2 -g``` to install pm2
 - Sart server
   1. run ```pm2 start ecosystem.config.js```,  you can enable `watch` by uncommenting line 9 if needed \
-    *Bun alternative*: replacing line 4 with ```bun app.js```
+    \* *Bun alternative*: replacing line 4 with ```bun app.js```
   2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
   3. run mysql and redis on local
   4. (optional) install docker compose and then run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development, you can skip **step 3** if you decide to follow this step
@@ -54,17 +54,17 @@ This project offers **2 modes** for development, both should work in most cases.
 - Stop server
   1. stop express server by entering ```pm2 stop sample-cluster-server```
   2. retart server with ```pm2 restart sample-cluster-server``` if needed
-### - Docker mode (recommend for linux)
+### - Docker mode (recommended)
 - Setup
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - Start server
   1. run ```docker compose -f docker-compose.dev.yml up -d``` to start services needed for development
   2. run ```npm run dev``` or ```docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c "npm i pm2 -g && /bin/bash"``` to start interactive docker container \
-    *Bun alternative*: ```npm run bun-dev``` or ```docker run -it --rm --init --ulimit memlock=-1:-1 -v $PWD/:/server --net host --name bun_server oven/bun:latest sh -c "/bin/bash"```
+    \* *Bun alternative*: ```npm run bun-dev``` or ```docker run -it --rm --init --ulimit memlock=-1:-1 -v $PWD/:/server --net host --name bun_server oven/bun:latest sh -c "/bin/bash"```
   3. inside the container, run ```cd /server && npm i``` to install packages \
-    *Bun alternative*: ```cd /server && bun i```
+    \* *Bun alternative*: ```cd /server && bun i```
   4. then run ```pm2 start ecosystem.config.cjs```, you can enable `watch` by uncommenting line 9 if needed \
-    *Bun alternative*: ```bun run bun-start```
+    \* *Bun alternative*: ```bun run bun-start```
   5. go to [localhost:3000](http://localhost:3000)
 - Stop server
   1. run ```pm2 stop ecosystem.config.cjs``` to stop server
@@ -74,7 +74,7 @@ It is recommended to use docker for production, but you can also run natively if
 ### - Docker mode (recommended)
 - Build
   1. run ```npm run build``` or ```docker build . -t web_server:latest``` to build docker image
-  2. configure environment variables in `.env` file based on th **Config** section below or run
+  2. configure environment variables in `.env` file following the **Config** section below or run
     ```
     export MYSQL_STORE=/PATH/TO/REDIS_STORE 
     export REDIS_STORE=/PATH/TO/REDIS_STORE
@@ -112,7 +112,7 @@ It is recommended to use docker for production, but you can also run natively if
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
-- traefik basic auth users in `traefik/users/usersfile`
+- traefik basic auth users are stored in `traefik/users/usersfile`
 
 ## HTTPS
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
