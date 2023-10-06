@@ -13,9 +13,7 @@ services:
     networks:
       - web_network
     environment:
-      MYSQL_ROOT_PASSWORD: 'rootPassword12#$'
-      # MYSQL_USER: 'test'
-      # MYSQL_PASS: 'password'
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWD}
 
   redis:
     container_name: redisdb
@@ -37,8 +35,6 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config # allow hot swap config files
-    # ports:
-    #   - "8081:80"
     networks:
       - web_network
     depends_on:
@@ -69,8 +65,8 @@ services:
       - BADGER_EPHEMERAL=false
       - BADGER_DIRECTORY_VALUE=/badger/data
       - BADGER_DIRECTORY_KEY=/badger/key
-    ports:
-      - 16686:16686
+    # ports:
+    #   - 16686:16686
     networks:
       - web_network
     volumes:
@@ -80,7 +76,7 @@ services:
       - "traefik.http.routers.jaeger.rule=Host(`jaeger.${LOCAL_DOMAIN_NAME}`)"
       - "traefik.http.routers.jaeger.service=jaeger"
       - "traefik.http.routers.jaeger.entrypoints=web"
-      # - "traefik.http.routers.jaeger.middlewares=ipfilter,auth"
+      - "traefik.http.routers.jaeger.middlewares=ipfilter"
       - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
 
   traefik:

@@ -77,10 +77,12 @@ It is recommended to use docker for production, but you can also run natively if
   2. configure environment variables in `.env` file following the **Config** section below or run
     ```
     export MYSQL_STORE=/PATH/TO/REDIS_STORE 
+    export MYSQL_PASSWD="rootPassword12#$"
     export REDIS_STORE=/PATH/TO/REDIS_STORE
     export DOMAIN_NAME=YOUR_DOMAIN_NAME 
     export EMAIL_ADDRESS=YOUR_EMAIL@gmail.com
-    export LAN_SUBNET=LANE_IP/SUBNET_MASK
+    export LOCAL_DOMAIN_NAME=YOUR_LOCAL_DOMAIN_NAME 
+    export LAN_SUBNET=LAN_IP/SUBNET_MASK
     ``` 
   3. enable ufw-docker following the **UFW** section below
 - Start server
@@ -105,9 +107,10 @@ It is recommended to use docker for production, but you can also run natively if
   - **NOTE**: remember to replace secrets and hostnames in `production.json`, fields in the file are just template, they are **NOT SAFE** for actual production
 - create a `.env` file to store environment variables for docker compose, which should include the following:
   -  `MYSQL_STORE` and `REDIS_STORE` pointing to paths where you want your databse content to be stored
+  -  `MYSQL_PASSWD` for mysql root password, if using `config/default.json` it should be `rootPassword12#$` 
   -  `DOMAIN_NAME` for letsencrypt acme challenge and traefik routing
   -  `EMAIL_ADDRESS` for letsencrypt notification
-  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui
+  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui, use `localhost` if not have any
   -  `LAN_SUBNET`(optional) for traefik dashboard ip whitelist, so local network can connect
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
