@@ -27,7 +27,7 @@
     },
     "jwt": {
         "secret": "Secret123$%^",
-        "length": 64,
+        "refreshLength": 64,
         "extendAccess": false,
         "extendRefresh": false,
         "accessExpire": 120,

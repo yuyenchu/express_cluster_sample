@@ -31,12 +31,17 @@ services:
   web_server:
     container_name: web_server
     image: web_server:latest
+    user: 1000:1000
     restart: always
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config # allow hot swap config files
+    security_opt:
+      - no-new-privileges:true
     networks:
       - web_network
+    # ports:
+    #   - 3000:80
     depends_on:
       - mysql
       - redis
@@ -91,8 +96,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik:/traefik
+    security_opt:
+      - no-new-privileges:true
     command:
-      # - "--log.level=DEBUG"
+      - "--log.level=DEBUG"
       - "--accesslog=true"
       - "--accesslog.filepath=/traefik/logs/access.log"
       - "--api=true"
@@ -104,6 +111,8 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entryPoints.websecure.http.tls.domains[0].main=${DOMAIN_NAME}"
       - "--certificatesresolvers.web_resolver.acme.httpchallenge=true"
       - "--certificatesresolvers.web_resolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.web_resolver.acme.email=${EMAIL_ADDRESS}"

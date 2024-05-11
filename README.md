@@ -187,7 +187,7 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [x] error page and logging
 - [ ] jsdoc api documentation
 - [ ] file upload and storing
-- [ ] server monitoring (lightship)
+- [x] helth monitoring (lightship)
 - [x] traefik routing and acme challenge
 - [x] jaeger tracing (badger local storage)
 - [x] ufw docker firewall

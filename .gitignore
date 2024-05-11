@@ -6,10 +6,12 @@ config/*
 cert/
 jaeger/
 traefik/letsencrypt/acme.json
+public/gallery/**
 
 # ds_store
 **/.DS_Store
 **/._.DS_Store
+**/._.*
 
 # db data
 mysql/data/

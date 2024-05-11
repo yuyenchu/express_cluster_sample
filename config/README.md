@@ -37,7 +37,7 @@
     //* see https://www.npmjs.com/package/jsonwebtoken#usage for more details */
     "jwt": {
         "secret": string, // jwt signing secret, 256 characters is recommended
-        "length": number, // refresh token length, which will be stored in redis
+        "refreshLength": number, // refresh token length, which will be stored in redis
         "extendAccess": boolean, // automatically issue new access token when expired
         "extendRefresh": boolean, // automatically issue new refresh token when expired
         "accessExpire": number, // access token expire time in seconds

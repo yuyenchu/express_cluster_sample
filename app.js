@@ -26,6 +26,7 @@ import { default as RedisStoreRate }    from 'rate-limit-redis';
 // set environment variable
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env['NODE_CONFIG_DIR'] = path.join(__dirname, 'config');
+process.env['NODE_ROOT_APP_DIR'] = __dirname;
 
 // import routes
 import apiRoutes    from './routers/api/apiRouter.js';
@@ -150,6 +151,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         useDefaults: true,
         directives: {
+            "default-src": [
+                "'self'",
+                "unpkg.com",
+                ...CSP.defaultSrc,
+            ],
             "script-src": [
                 "'self'", 
                 "'unsafe-inline'",
@@ -158,7 +164,23 @@ app.use(helmet({
             "script-src-attr": [
                 "'self'", 
                 "'unsafe-inline'",
-            ]
+            ],
+            "style-src": [
+                "'self'",
+                "'unsafe-inline'",
+                ...CSP.styleSrc,
+            ],
+            "font-src": [
+                "'self'", 
+                "https: data:",
+                ...CSP.fontSrc,
+            ],
+            "img-src": [
+                "'self'", 
+                "https: data:",
+                "blob:"
+            ],
+            ...(USE_SSL ? {} : {"upgradeInsecureRequests": null}),
         },
     },
 }));
@@ -317,7 +339,7 @@ app.use(function(err, req, res, next){
 });
 
 // setup lightship for graceful shutdown and health check
-const lightship = await createLightship();
+const lightship = await createLightship({detectKubernetes: false});
 let connections = new Set();
 
 server.on('connection', function(conn) {
