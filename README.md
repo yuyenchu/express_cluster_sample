@@ -200,3 +200,4 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [ ] typescript (maybe)
 - [ ] react / angular/ vue support (maybe)
 - [ ] bun compatibility
+- [x] traefik metrics with prometheus & grafana

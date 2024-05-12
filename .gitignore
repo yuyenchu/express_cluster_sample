@@ -7,10 +7,16 @@ cert/
 jaeger/
 traefik/letsencrypt/acme.json
 public/gallery/**
+prometheus/*
+!prometheus/prometheus.yml
+grafana/*
+!grafana/provisioning/
+!grafana/grafana.ini
 
 # ds_store
 **/.DS_Store
 **/._.DS_Store
+**/._*
 **/._.*
 
 # db data

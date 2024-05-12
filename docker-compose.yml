@@ -11,7 +11,8 @@ services:
     # ports:
     #   - "3306:3306"
     networks:
-      - web_network
+      web_network:
+        ipv4_address: 172.28.0.2
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWD}
 
@@ -26,7 +27,8 @@ services:
     # ports:
     #   - "6379:6379"
     networks:
-      - web_network
+      web_network:
+        ipv4_address: 172.28.0.4
 
   web_server:
     container_name: web_server
@@ -61,6 +63,60 @@ services:
       - "traefik.http.routers.web_server_secure.tls.certresolver=web_resolver"
       - "traefik.http.services.web_server_secure.loadbalancer.server.port=80"
   
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    restart: always
+    volumes:
+      - ${PROM_STORE}:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.size=256MB'
+    labels:
+      - "traefik.enable=true"
+    networks:
+      web_network:
+        ipv4_address: 172.28.0.8
+    logging:
+      options:
+        max-size: "30m"
+        max-file: "3"
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    restart: always
+    volumes:
+      - ${GRAFANA_STORE}:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    environment:
+      - GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION=true
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+      - LOCAL_DOMAIN_NAME=${LOCAL_DOMAIN_NAME:-localhost}
+      - LOCAL_IP_ADDR=${LOCAL_IP_ADDR:-127.0.0.1}
+    networks:
+      web_network:
+        ipv4_address: 172.28.0.10
+    # ports:
+    #   - 3001:3000
+    depends_on:
+      - prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.${LOCAL_DOMAIN_NAME:-localhost}`)||(Host(`${LOCAL_IP_ADDR:-127.0.0.1}`) && PathPrefix(`/grafana`))"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.routers.grafana.entrypoints=web"
+      - "traefik.http.routers.grafana.middlewares=ipfilter,auth"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    logging:
+      options:
+        max-size: "30m"
+        max-file: "3"  
+
   jaeger:
     container_name: jaeger
     image: jaegertracing/all-in-one:latest
@@ -75,7 +131,8 @@ services:
     # ports:
     #   - 16686:16686
     networks:
-      - web_network
+      web_network:
+        ipv4_address: 172.28.0.12
     volumes:
       - ./jaeger:/badger
     labels:
@@ -94,7 +151,8 @@ services:
       - 8080:80
       - 8081:443
     networks:
-      - web_network
+      web_network:
+        ipv4_address: 172.28.0.20
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik:/traefik
@@ -109,6 +167,9 @@ services:
       - "--tracing.jaeger=true"
       - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
       - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--metrics.prometheus=true"
+      - "--entryPoints.metrics.address=:8888"
+      - "--metrics.prometheus.entryPoint=metrics"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
