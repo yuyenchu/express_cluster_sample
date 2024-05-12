@@ -117,7 +117,7 @@ It is recommended to use docker for production, but you can also run natively if
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
 - redis config files are stored in `redis` folder, `redis-dev.conf` is for `docker-compose.dev.yml`
-- traefik basic auth users are stored in `traefik/users/usersfile`
+- traefik basic auth users are stored in `traefik/users/usersfile`, passwords must be hashed using MD5, SHA1, or BCrypt, [more reference](https://doc.traefik.io/traefik-hub/api-gateway/configuration/middleware/http/basic-auth#usersfile)
 
 ## HTTPS
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
