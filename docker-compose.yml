@@ -39,7 +39,8 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - web_network
+      web_network:
+        ipv4_address: 172.28.0.6
     # ports:
     #   - 3000:80
     depends_on:
@@ -70,6 +71,7 @@ services:
       - BADGER_EPHEMERAL=false
       - BADGER_DIRECTORY_VALUE=/badger/data
       - BADGER_DIRECTORY_KEY=/badger/key
+      - QUERY_BASE_PATH=/jaeger
     # ports:
     #   - 16686:16686
     networks:
@@ -78,10 +80,10 @@ services:
       - ./jaeger:/badger
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jaeger.rule=Host(`jaeger.${LOCAL_DOMAIN_NAME}`)"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.${LOCAL_DOMAIN_NAME:-localhost}`)||(Host(`${LOCAL_IP_ADDR:-127.0.0.1}`) && PathPrefix(`/jaeger`))"
       - "traefik.http.routers.jaeger.service=jaeger"
       - "traefik.http.routers.jaeger.entrypoints=web"
-      - "traefik.http.routers.jaeger.middlewares=ipfilter"
+      - "traefik.http.routers.jaeger.middlewares=ipfilter,auth"
       - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
 
   traefik:
@@ -119,7 +121,7 @@ services:
       - "--certificatesresolvers.web_resolver.acme.storage=/traefik/letsencrypt/acme.json"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN_NAME}`)||PathPrefix(`/api`, `/dashboard`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${LOCAL_DOMAIN_NAME:-localhost}`)||(Host(`${LOCAL_IP_ADDR:-127.0.0.1}`) && PathPrefix(`/api`, `/dashboard`))"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.routers.traefik.middlewares=ipfilter,auth"
@@ -129,8 +131,8 @@ services:
 networks:
   web_network:
     driver: bridge
-    # ipam:
-    #   driver: default
-    #   config:
-    #     - subnet: 172.28.0.0/16
-    #       gateway: 172.28.0.1
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1

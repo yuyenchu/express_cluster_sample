@@ -82,6 +82,7 @@ It is recommended to use docker for production, but you can also run natively if
     export DOMAIN_NAME=YOUR_DOMAIN_NAME 
     export EMAIL_ADDRESS=YOUR_EMAIL@gmail.com
     export LOCAL_DOMAIN_NAME=YOUR_LOCAL_DOMAIN_NAME 
+    export LOCAL_IP_ADDR=YOUR_LOCAL_IP_ADDRESS 
     export LAN_SUBNET=LAN_IP/SUBNET_MASK
     ``` 
   3. enable ufw-docker following the **UFW** section below
@@ -110,7 +111,8 @@ It is recommended to use docker for production, but you can also run natively if
   -  `MYSQL_PASSWD` for mysql root password, if using `config/default.json` it should be `rootPassword12#$` 
   -  `DOMAIN_NAME` for letsencrypt acme challenge and traefik routing
   -  `EMAIL_ADDRESS` for letsencrypt notification
-  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui, use `localhost` if not have any
+  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui, will use `localhost` if left blank
+  -  `LOCAL_IP_ADDR`(optional) for local network access to traefik dashboard and jaeger ui, will use `127.0.0.1` if left blank
   -  `LAN_SUBNET`(optional) for traefik dashboard ip whitelist, so local network can connect
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
