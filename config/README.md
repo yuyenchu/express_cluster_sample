@@ -3,7 +3,7 @@
 {
     "port": number, // port number the server will listen
     "utcOffset": number, // utc offset for moment
-    "useSSL": boolean, // use https server or not
+    "useSSL": boolean, // use https server or not, true to provide your own ssl certificates, false if using traefik's certification
     "sslKey": string, // path to ssl certificate key file
     "sslCert": string, // path to ssl certificate cert file
     "sslChain": string, // path to ssl certificate chain/fullchain file

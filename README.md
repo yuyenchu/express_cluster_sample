@@ -81,8 +81,8 @@ It is recommended to use docker for production, but you can also run natively if
     export REDIS_STORE=/PATH/TO/REDIS_STORE
     export DOMAIN_NAME=YOUR_DOMAIN_NAME 
     export EMAIL_ADDRESS=YOUR_EMAIL@gmail.com
-    export LOCAL_DOMAIN_NAME=YOUR_LOCAL_DOMAIN_NAME 
-    export LOCAL_IP_ADDR=YOUR_LOCAL_IP_ADDRESS 
+    export LOCAL_DOMAIN_NAME=YOUR_SERVER_LOCAL_DOMAIN_NAME 
+    export LOCAL_IP_ADDR=YOUR_SERVER_LOCAL_IP_ADDRESS 
     export LAN_SUBNET=LAN_IP/SUBNET_MASK
     ``` 
   3. enable ufw-docker following the **UFW** section below
@@ -111,8 +111,10 @@ It is recommended to use docker for production, but you can also run natively if
   -  `MYSQL_PASSWD` for mysql root password, if using `config/default.json` it should be `rootPassword12#$` 
   -  `DOMAIN_NAME` for letsencrypt acme challenge and traefik routing
   -  `EMAIL_ADDRESS` for letsencrypt notification
-  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui, will use `localhost` if left blank
-  -  `LOCAL_IP_ADDR`(optional) for local network access to traefik dashboard and jaeger ui, will use `127.0.0.1` if left blank
+  -  `LOCAL_DOMAIN_NAME`(optional) for local network access to traefik dashboard and jaeger ui
+     -  the server's local domain name, should be set at local DNS server, will use `localhost` if left blank
+  -  `LOCAL_IP_ADDR`(optional) for local network access to traefik dashboard and jaeger ui, 
+     -  the server's local IP, can be found and set at your router, will use `127.0.0.1` if left blank
   -  `LAN_SUBNET`(optional) for traefik dashboard ip whitelist, so local network can connect
 - pm2 use `ecosystem.config.js` for configs, you can change cluster instances, environment vairables, and others in there
 - mysql init scripts are stored in `mysql` folder, `init-dev.sql` is for `docker-compose.dev.yml`
@@ -122,7 +124,7 @@ It is recommended to use docker for production, but you can also run natively if
 ## HTTPS
 **NOTE**: You will need a **domain name** to get certificate from letsencrypt.
 ### Traefik
-By default, this project uses traefik to route https requests and auto renew ssl certificates with acme http challenge. For alternative, manual obtained ssl certificates are also supported using the server script, which will require some settings in config file.
+By default, this project uses traefik to route https requests and auto renew ssl certificates with acme http challenge. For alternative, manual obtained ssl certificates are also supported using the server script, which will require some settings in server config file.
 ### Certbot 
 To use certbot to obtain ssl certificates, following are instructions about how to use it.\
 - to use certbot to generate ssl certificates, run ```docker run --rm  -v /etc/letsencrypt:/etc/letsencrypt  -p 80:80 -ti certbot/certbot certonly --standalone --email EMAIL_ADDRESS --agree-tos --preferred-challenges http -d DOMAIN_NAME```
@@ -197,7 +199,7 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [ ] in-memory cache for commonly used data
 - [ ] kubernetes
 - [ ] heroku / aws deployment script
-- [ ] typescript (maybe)
+- [ ] typescript
 - [ ] react / angular/ vue support (maybe)
 - [ ] bun compatibility
 - [x] traefik metrics with prometheus & grafana
