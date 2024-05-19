@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: "sample-cluster-server",
-        script: "app.js",
+        script: "./src/app.js",
         wait_ready: true,
         kill_timeout : 3000,
         exec_mode: "cluster",

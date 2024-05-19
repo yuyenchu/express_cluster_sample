@@ -25,8 +25,8 @@ import { default as RedisStoreRate }    from 'rate-limit-redis';
 
 // set environment variable
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-process.env['NODE_CONFIG_DIR'] = path.join(__dirname, 'config');
-process.env['NODE_ROOT_APP_DIR'] = __dirname;
+process.env['NODE_ROOT_APP_DIR'] = path.resolve(__dirname, '..');
+process.env['NODE_CONFIG_DIR'] = path.join(process.env['NODE_ROOT_APP_DIR'], 'config');
 
 // import routes
 import apiRoutes    from './routers/api/apiRouter.js';
@@ -40,7 +40,8 @@ import redisClient  from './models/redis.js';
 import { renewAccessToken } from './middlware/jwtAuth.js';
 
 // import util 
-import { statusCodeToReason } from './utils/statusCode.js'
+import { statusCodeToReason } from './utils/statusCode.js';
+import { listMiddlewares, listRoutes } from './utils/listInfo.js'
 
 // reading configurations from config directory
 import config from 'config';
@@ -98,11 +99,11 @@ server.setTimeout(DEFAULT_TIMEOUT);
 // create a rotating write stream for logger
 let accessLogStream = rfs.createStream('access.log', {
     interval: RTFS_ROTATE,
-    path: path.join(__dirname, 'logs')
+    path: path.join(process.env['NODE_ROOT_APP_DIR'], 'logs')
 })
 
 // create winston logger for error handling middleware
-const { combine, timestamp, label, printf } = winston.format;
+const { combine, cli, timestamp, label, printf, uncolorize } = winston.format;
 const errorLogger = winston.createLogger({
     level: 'warn',
     format: combine(
@@ -121,11 +122,33 @@ const errorLogger = winston.createLogger({
             level: 'error',
             stream: rfs.createStream('error.log', {
                 interval: RTFS_ROTATE,
-                path: path.join(__dirname, 'logs')
+                path: path.join(process.env['NODE_ROOT_APP_DIR'], 'logs')
             })
         })
     ],
 });
+// create winston logger for app info logging
+const appInfoLogger = winston.createLogger({
+    level: 'info',
+    transports: [
+        ...(process.env.NODE_ENV==='production' ? [] :
+            [new winston.transports.Console({
+                format: combine(
+                    cli(),
+                    printf(({ message }) => message),
+                )
+            })]
+        ),
+        new winston.transports.File({ 
+            format: combine(
+                uncolorize(),
+                printf(({ message }) => message),
+            ),
+            filename: path.join(process.env['NODE_ROOT_APP_DIR'], 'logs', 'app_info.log'), 
+            options: { flags: 'w' }
+        })
+    ]
+  });
 
 // compress middleware filter
 const shouldCompress = (req, res) => {
@@ -137,7 +160,7 @@ const shouldCompress = (req, res) => {
 
 // app middleware setup
 // using ejs views for dynamic pages
-app.set('views', path.join(__dirname, '/views'))
+app.set('views', path.join(process.env['NODE_ROOT_APP_DIR'], '/views'))
 app.set('view engine', 'ejs');
 // using HTTP request logger middleware
 app.use(morgan('short'));
@@ -239,9 +262,9 @@ app.use(slowDownMiddleware.unless({
     ext: [".png", ".jpg", ".css", ".js", ".ico"]
 }));
 // setting static directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.env['NODE_ROOT_APP_DIR'], 'public')));
 // favicon serving middleware with caching
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(process.env['NODE_ROOT_APP_DIR'], 'public', 'favicon.ico')));
 // setting cache control to do not allow any disk cache 
 // to prevent reload page without login
 app.use((req, res, next) => {
@@ -261,7 +284,7 @@ app.get('/', function (req, res) {res.redirect('/home')});
 // params and send text
 app.get('/id/:id', function (req, res) {res.send("Your ID is "+req.params.id)}); 
 // send file
-app.get('/image', function (req, res) {res.sendFile(path.join(__dirname,'/public/images/trollface.png'))}); 
+app.get('/image', function (req, res) {res.sendFile(path.join(process.env['NODE_ROOT_APP_DIR'],'/public/images/trollface.png'))}); 
 
 // view routes
 app.get('/home', async function(req, res) {
@@ -363,18 +386,21 @@ server.listen(PORT, async function () {
     // moment formating current datetime in mysql datetime style
     const time = moment().utcOffset(UTC_OFFSET).format('YYYY-MM-DD HH:mm:ss');
     // http calls with fetch and abort if taking too long
+    let serverIP = undefined;
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 1000);
 
     try {
         const res = await fetch('https://ipv4.jsonip.com', { signal: controller.signal });
         const data = await res.json();
+        serverIP = data.ip;
         console.log(`[START] app listening on ${data.ip}:${PORT} (${time})`);
     } catch(err) {
         console.log(`[START] app listening on port ${PORT} (${time})`);
         console.error(`[ERROR] (fetch) ${err}`);
     }
 
+    // query mysql for user count
     try {
         const userCount = await generalModel.getUserCount();
         console.log(`[INFO] current user in databse: ${userCount??'Unknown'}`);
@@ -383,6 +409,15 @@ server.listen(PORT, async function () {
         console.error(`[ERROR] (mysql) ${err}`);
     }
 
+    // log app info
+    const spacer = '='.repeat(10);
+    appInfoLogger.info(`[${time}] Application Info: IP at ${serverIP}`);
+    appInfoLogger.info(`\n${spacer} Routes ${spacer}`);
+    listRoutes(app, {logger: appInfoLogger.info});
+    appInfoLogger.info(`\n${spacer} Middlewares ${spacer}`);
+    listMiddlewares(app, {logger: appInfoLogger.info});
+
+    // signal lightship server is up running
     lightship.signalReady();
     if(process.send) process.send('ready');
 })

@@ -37,7 +37,7 @@ services:
     restart: always
     volumes:
       - ./logs:/app/logs
-      - ./config:/app/config # allow hot swap config files
+      - ./server/config:/app/config # allow hot swap config files
     security_opt:
       - no-new-privileges:true
     networks:
