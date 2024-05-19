@@ -1,0 +1,71 @@
+{
+    "port": 80,
+    "utcOffset": 8,
+    "useSSL": false,
+    "sslKey": "cert/live/yhs473.tplinkdns.com/privkey.pem",
+    "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
+    "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
+    "rtfsRotate": "1d",
+    "defaultTimeout": 120000,
+    "mysql": {
+        "host": "mysqldb",
+        "user": "root",
+        "password" : "rootPassword12#$",
+        "database" : "userDB",
+        "connLimit": 10
+    },
+    "redis": {
+        "host": "redisdb",
+        "port" : 6379,
+        "password" : ""
+    },
+    "session": {
+        "secret": "LEK7zLQxG9h@r.hwPECGjRV}5#Yk:2W8:NK;hKyKJ*Nih=fY,m.V73z!U7$7yg_*Qa7}9*]XE&d@FF4($A+7K(4u(We?Vnqmx;PS,e)(:6dBG]/w$rn}-T}6EjhiP=Eam:!p+$)rc$yfBUh),H[ND,uyKcva8MF7bn{5hWywj4aQitXqD!!x*v#mCEuZ_t3$pa{@eP)}#/)A_yf5iFi#;Az=@mVjE*Z/C!Y7:GnLT}HR3:gcp,dqdaN76B:y2?Yk",
+        "maxAge": 1800000,
+        "resave": false,
+        "saveUninit": false
+    },
+    "jwt": {
+        "secret": "Secret123$%^",
+        "extendRefresh": false,
+        "refreshLength": 128,
+        "accessExpire": 600,
+        "refreshExpire": 2592000
+    },
+    "rateLimit": {
+        "window": 900000,
+        "maxReq": 30
+    },
+    "slowDown": {
+        "window": 900000,
+        "delayAfter": 30,
+        "delay": 200,
+        "maxDelay": 2000,
+        "skipFail": false,
+        "skipSuccess": false
+    },
+    "csp": {
+        "defaultSrc": [
+            "unpkg.com",
+            "yhs473.tplinkdns.com"
+        ],
+        "scriptSrc": [
+            "unpkg.com", 
+            "yhs473.tplinkdns.com", 
+            "cdnjs.cloudflare.com"
+        ],
+        "styleSrc": [
+            "yhs473.tplinkdns.com", 
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu",
+            "unpkg.com"
+        ],
+        "fontSrc": [
+            "yhs473.tplinkdns.com", 
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+            "fonts.iu.edu"
+        ]
+    }
+}
