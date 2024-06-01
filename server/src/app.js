@@ -285,6 +285,41 @@ app.get('/', function (req, res) {res.redirect('/home')});
 app.get('/id/:id', function (req, res) {res.send("Your ID is "+req.params.id)}); 
 // send file
 app.get('/image', function (req, res) {res.sendFile(path.join(process.env['NODE_ROOT_APP_DIR'],'/public/images/trollface.png'))}); 
+// stream file
+app.get('/video', function (req, res) {
+    const range = req.headers.range;
+    const videoPath = path.join(process.env['NODE_ROOT_APP_DIR'],'/public/videos/Rickroll.mp4');
+    const videoSize = fs.statSync(videoPath).size;
+    if (range) {
+        const CHUNK_SIZE = 10 ** 6;
+        let [start, end] = range.replace(/bytes=/, "").split("-").map(i => parseInt(i, 10));
+        end = Math.min(isNaN(end) ? start + CHUNK_SIZE : end, videoSize - 1);
+        if (start >= videoSize || isNaN(start) || isNaN(end)) {
+            //416 Range Not Satisfiable
+            res.writeHead(416, {    
+              "Content-Range": `bytes */${videoSize}`
+            });
+            return res.end();
+        } else {
+            // 206 Parital Content
+            res.writeHead(206, {
+                "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+                "Accept-Ranges": "bytes",
+                "Content-Length": end - start + 1,
+                "Content-Type": "video/mp4",
+            });
+            const videoStream = fs.createReadStream(videoPath, { start, end });
+            return videoStream.pipe(res);
+        }
+    } else {
+        res.writeHead(200, {
+            "Content-Length": videoSize,
+            "Content-Type": "video/mp4"
+        });
+        const videoStream = fs.createReadStream(videoPath);
+        return videoStream.pipe(res);
+    }
+}); 
 
 // view routes
 app.get('/home', async function(req, res) {

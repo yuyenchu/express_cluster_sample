@@ -68,7 +68,7 @@ This project offers **2 modes** for development, both should work in most cases.
     \* *Bun alternative*: replacing line 4 with ```bun src/app.js```
   2. (optional) run ```pm2 log sample-cluster-server``` to see the logs 
   3. run mysql and redis on local
-  4. (optional) install docker compose and then run ```docker compose -f ../docker-compose.dev.yml up -d``` to start services needed for development, you can skip **step 3** if you decide to follow this step
+  4. (optional) install docker compose and then run ```docker compose -f ../docker-compose.dev.yml -p express_dev up -d``` to start services needed for development, you can skip **step 3** if you decide to follow this step
   5. go to [localhost:3000](http://localhost:3000)
 - Stop server
   1. stop express server by entering ```pm2 stop sample-cluster-server```
@@ -77,7 +77,7 @@ This project offers **2 modes** for development, both should work in most cases.
 - Setup
   1. install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - Start server
-  1. run ```docker compose -f ../docker-compose.dev.yml up -d``` to start services needed for development
+  1. run ```docker compose -f ../docker-compose.dev.yml -p express_dev up -d``` to start services needed for development
   2. run ```npm run dev``` or ```docker run -it --rm -v $PWD/:/server --net host --name node_server node:latest sh -c "npm i pm2 -g && /bin/bash"``` to start interactive docker container \
     \* *Bun alternative*: ```npm run bun-dev``` or ```docker run -it --rm --init --ulimit memlock=-1:-1 -v $PWD/:/server --net host --name bun_server oven/bun:latest sh -c "/bin/bash"```
   3. inside the container, run ```cd /server && npm i``` to install packages \
@@ -88,9 +88,8 @@ This project offers **2 modes** for development, both should work in most cases.
 - Stop server
   1. run ```pm2 stop ecosystem.config.cjs``` to stop server
   2. exit the container (this will also remove the container)
-
 ## Production setup
-It is recommended to use docker for production, but you can also run natively if you really want to. \
+It is recommended to use docker for production, but you can also run natively if you really want to.\
 **NOTE**: following commands are executed in `server` folder
 ### - Docker mode (recommended)
 - Build
