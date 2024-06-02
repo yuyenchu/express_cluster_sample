@@ -57,6 +57,7 @@ const SSL_CERT  = config.get('sslCert');
 const SSL_CHAIN = config.get('sslChain');
 const UTC_OFFSET  = config.get('utcOffset');
 const RTFS_ROTATE = config.get('rtfsRotate');
+const RTFS_MAXFILES = config.get('rtfsMaxFiles');
 const DEFAULT_TIMEOUT = config.get('defaultTimeout');
 
 // express server
@@ -97,8 +98,9 @@ if (USE_SSL) {
 server.setTimeout(DEFAULT_TIMEOUT);
 
 // create a rotating write stream for logger
-let accessLogStream = rfs.createStream('access.log', {
+const accessLogStream = rfs.createStream('access.log', {
     interval: RTFS_ROTATE,
+    maxFiles: RTFS_MAXFILES,
     path: path.join(process.env['NODE_ROOT_APP_DIR'], 'logs')
 })
 
@@ -122,6 +124,7 @@ const errorLogger = winston.createLogger({
             level: 'error',
             stream: rfs.createStream('error.log', {
                 interval: RTFS_ROTATE,
+                maxFiles: RTFS_MAXFILES,
                 path: path.join(process.env['NODE_ROOT_APP_DIR'], 'logs')
             })
         })

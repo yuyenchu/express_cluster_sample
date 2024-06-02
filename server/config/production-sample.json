@@ -6,6 +6,7 @@
     "sslCert": "cert/live/YOUR_DOMAINcert.pem",
     "sslChain": "cert/live/YOUR_DOMAIN/fullchain.pem",
     "rtfsRotate": "1d",
+    "rtfsMaxFiles": 50,
     "defaultTimeout": 120000,
     "mysql": {
         "host": "mysqldb",

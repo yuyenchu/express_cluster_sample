@@ -6,6 +6,7 @@
     "sslCert": "cert/live/yhs473.tplinkdns.com/cert.pem",
     "sslChain": "cert/live/yhs473.tplinkdns.com/fullchain.pem",
     "rtfsRotate": "1d",
+    "rtfsMaxFiles": 10,
     "defaultTimeout": 120000,
     "mysql": {
         "host": "localhost",
