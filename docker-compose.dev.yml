@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  mysql:
+  mysql_dev:
     image: mysql:latest
     container_name: mysql_dev
     restart: "no"
@@ -14,7 +14,7 @@ services:
       # MYSQL_USER: 'test'
       # MYSQL_PASS: 'password'
 
-  redis:
+  redis_dev:
     image: redis:alpine
     container_name: redis_dev
     command: redis-server /etc/redis/redis.conf

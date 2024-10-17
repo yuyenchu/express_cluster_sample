@@ -229,3 +229,4 @@ To uninstall, simply open `/etc/ufw/after.rules` and remove lines between the co
 - [ ] react / angular/ vue support (maybe)
 - [ ] bun compatibility
 - [x] traefik metrics with prometheus & grafana
+- [x] 2FA authentication

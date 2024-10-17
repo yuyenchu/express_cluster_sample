@@ -36,13 +36,16 @@
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.3",
     "nanoid": "^4.0.2",
     "node-fetch": "^3.3.1",
     "path": "^0.12.7",
+    "qrcode": "^1.5.4",
     "rate-limit-redis": "^2.1.0",
     "rotating-file-stream": "^3.1.0",
     "serve-favicon": "^2.5.0",
+    "speakeasy": "^2.0.0",
     "winston": "^3.9.0"
   }
 }

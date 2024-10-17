@@ -1,3 +1,8 @@
+**/.git 
+**/.gitignore
+**/.DS_Store
+**/._.DS_Store
+**/._*
 **/node_modules/
 **/log/
 **/logs/
@@ -5,6 +10,10 @@ mysql/
 redis/
 traefik/
 jaeger/
+grafana/
+prometheus/
+k8s/
+ufw-docker
 Dockerfile
 docker-compose.yml
 docker-compose.*.yml

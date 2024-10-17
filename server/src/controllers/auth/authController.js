@@ -1,4 +1,5 @@
 import config from 'config';
+import speakeasy from 'speakeasy';
 
 import authModel from '../../models/authModel.js';
 import redisClient from '../../models/redis.js';
@@ -31,7 +32,7 @@ async function register(req, res, next) {
 }
 
 async function login(req, res, next) {
-    const { username, password } = req.body;
+    const { username, password, token } = req.body;
     if (!username || !password) {
         return next(new AuthError('username or password missing', 400, username, password));
     }
@@ -40,6 +41,20 @@ async function login(req, res, next) {
     }
 
     if (await authModel.checkUser({username, password})) {
+        if (await authModel.checkSecret({username})) {
+            if (!token) {
+                return next(new AuthError('2FA token missing', 400, username, password));
+            }
+            const secret = await authModel.getSecret({username});
+            const verified = speakeasy.totp.verify({
+                secret: secret,
+                encoding: 'ascii',
+                token: token
+            });
+            if (!verified) {
+                return res.render('login', {message: '2FA token is incorrect', messageColor: 'red'});
+            }
+        }
         req.session.username = username;
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const { accessToken, refreshToken } = await generateJWT(`${ip}/${username}`);
@@ -77,5 +92,30 @@ async function logout(req, res, next) {
     });
 }
 
-const AuthController = { register, login, logout };
+async function activate2FA(req, res, next) {
+    const username = req?.session?.username?.trim();
+    if (!username) {
+        return next(new AuthError('activate 2FA without login', 400, username));
+    }
+    if (await authModel.checkSecret({username})) {
+        return next(new AuthError('2FA already activated', 403, username));
+    }
+    const secret = speakeasy.generateSecret({length: 32});
+    await authModel.setSecret({username, secret: secret.ascii});
+    res.redirect('/2fa');
+}
+
+async function deactivate2FA(req, res, next) {
+    const username = req?.session?.username?.trim();
+    if (!username) {
+        return next(new AuthError('deactivate 2FA without login', 400, username));
+    }
+    if (!await authModel.checkSecret({username})) {
+        return next(new AuthError('2FA already deactivated', 403, username));
+    }
+    await authModel.setSecret({username, secret: null});
+    res.redirect('/2fa');
+}
+
+const AuthController = { register, login, logout, activate2FA, deactivate2FA };
 export default AuthController;

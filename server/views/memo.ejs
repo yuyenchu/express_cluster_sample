@@ -20,6 +20,7 @@
                 <a href="/home" class="inactive">Home</a>
                 <a href="/memo" class="active">Memo</a>
                 <% if(login) { -%>
+                    <a href="/2fa" class="inactive">2FA</a>
                     <a href="#" class="login" onclick="logout()">Logout</a>
                 <% } else{ -%>
                     <a href="/login" class="login">Login</a>

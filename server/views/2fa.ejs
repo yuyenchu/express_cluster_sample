@@ -1,9 +1,9 @@
-<!-- views/error.ejs -->
+<!-- views/login.ejs -->
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Error</title>
+        <title>2FA Registration</title>
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
         <script defer src="/script/swup.min.js"></script>
         <script defer src="/script/swup-preload.min.js"></script>
@@ -17,7 +17,7 @@
                 <a href="/home" class="inactive">Home</a>
                 <a href="/memo" class="inactive">Memo</a>
                 <% if(login) { %>
-                    <a href="/2fa" class="inactive">2FA</a>
+                    <a href="/2fa" class="active">2FA</a>
                     <a href="#" class="login" onclick="logout()">Logout</a>
                 <% } else{ %>
                     <a href="/login" class="login">Login</a>
@@ -26,9 +26,16 @@
         </header>
         <div class="spinner"></div>
         <main id="swup" class="transition-fade">
-            <h1 style="color: #C6C6C6; margin-top: 80px;">
-                Error <%= status %> - <%= error?.message??JSON.stringify(error?.err)??'' %>
-            </h1>
+            <h3>Username: <%= username %></h3>
+            <h3>2FA status: <%= data ? 'Active' : 'Inactive' %></h3> 
+            <form action="/auth/2fa/<%= data ? 'deactivate': 'activate' %>" method="POST">
+                <button type="submit"><%= data ? 'Deactivate': 'Activate' %></button>
+            </form>
+            <img src="<%= data %>">
+            <% if(data) { %>
+                <h3>Scan QRcode and register 2FA to your authenticator app</h3>
+            <% } %>
+            
         </main>
     </body>
 </html>

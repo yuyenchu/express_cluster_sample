@@ -3,6 +3,7 @@ USE userDB;
 CREATE TABLE users (
     `username` varchar(80) NOT NULL,
     `password` varchar(41) NOT NULL,
+    `secret` char(32),
     PRIMARY KEY (`username`)
 );
 INSERT INTO users 

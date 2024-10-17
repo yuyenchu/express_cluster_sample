@@ -12,6 +12,7 @@ prometheus/*
 grafana/*
 !grafana/provisioning/
 !grafana/grafana.ini
+k8s/*
 
 # ds_store
 **/.DS_Store

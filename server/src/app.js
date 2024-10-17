@@ -12,7 +12,9 @@ import moment       from 'moment';
 import morgan       from 'morgan';
 import fetch        from 'node-fetch';
 import path         from 'path';
+import QRCode       from 'qrcode';
 import rfs          from 'rotating-file-stream';
+import speakeasy    from 'speakeasy';
 import favicon      from 'serve-favicon';
 import winston      from 'winston';
 // plugins that only need to be import
@@ -33,6 +35,7 @@ import apiRoutes    from './routers/api/apiRouter.js';
 import authRoutes   from './routers/auth/authRouter.js';
 
 // import model for general use
+import authModel    from './models/authModel.js';
 import generalModel from './models/generalModel.js';
 import redisClient  from './models/redis.js';
 
@@ -350,6 +353,20 @@ app.get('/login', function(req, res) {
         res.redirect('/memo');
     } else {
         res.render('login',{message:'', messageColor:'black'});
+    }
+});
+app.get('/2fa', renewAccessToken, async function(req, res) {
+    const username = req.session?.username?.trim();
+    if(username) {
+        const secret = await authModel.getSecret({username});
+        const data = secret ? await QRCode.toDataURL(speakeasy.otpauthURL({
+            secret,
+            label: `Express cluster: ${username}`,
+            encoding: 'ascii'
+        })) : '';
+        res.render('2fa',{login: username!==undefined, username, data});
+    } else {
+        res.redirect('/login');
     }
 });
 
