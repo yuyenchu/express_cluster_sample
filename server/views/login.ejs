@@ -37,17 +37,23 @@
                 <div class="form-container signin-container">
                     <form action="/auth/login" method="POST">
                         <h2>Login form</h2>
-                        <input type="text" name="username" placeholder="username" required/>
-                        <input type="text" name="password" placeholder="password" required/>
-                        <input type="text" name="token" placeholder="2FA token if activated"/>
+                        <input id="signinUser" type="text" name="username" placeholder="username" autocomplete="username" required/>
+                        <input id="signinPass" type="password" name="password" placeholder="password" autocomplete="current-password" required/>
+                        <div>
+                            <input type="checkbox" onclick="togglePassword('signinPass')">Show Password
+                        </div>
+                        <input id="signin2fa" type="text" name="token" placeholder="2FA token if activated" autocomplete="off" />
                         <button type="submit">Login</button>
                     </form>
                 </div>
                 <div class="form-container signup-container">
                     <form action="/auth/register" method="POST">
                         <h2>Signup form</h2>
-                        <input type="text" name="username" placeholder="enter a username" required/>
-                        <input type="text" name="password" placeholder="enter a password" required/>
+                        <input id="signupUser" type="text" name="username" placeholder="enter a username" autocomplete="off" required/>
+                        <input id="signupPass" type="password" name="password" placeholder="enter a password" autocomplete="new-password" required/>
+                        <div>
+                            <input type="checkbox" onclick="togglePassword('signupPass')">Show Password 
+                        </div>
                         <button type="submit">Signup</button>
                     </form>
                 </div>

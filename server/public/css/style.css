@@ -347,6 +347,12 @@ form#addform div {
     margin-bottom: 60px;
 }
 
+.form-container > form > div {
+    margin-top: -12px;
+    font-size: 12px;
+    align-items: start;
+}
+
 .signin-container {
     left: 0;
 	width: 50%;

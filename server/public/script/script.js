@@ -101,3 +101,8 @@ function deleteMemo(id) {
         console.error(err);
     });
 }
+
+function togglePassword(id) {
+    let x = document.getElementById(id);
+    x.type = x.type === "password"?"text":"password";
+} 
